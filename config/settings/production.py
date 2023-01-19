@@ -5,6 +5,8 @@ from config.settings.base import *
 
 DEBUG = False
 
+ALLOWED_HOSTS = ['collaboread.herokuapp.com']
+
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
