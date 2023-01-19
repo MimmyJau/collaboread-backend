@@ -1,6 +1,6 @@
 import dj_database_url
 
-from collaboread.settings.base import *
+from config.settings.base import *
 
 
 DEBUG = False

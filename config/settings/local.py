@@ -1,4 +1,4 @@
-from collaboread.settings.base import *
+from config.settings.base import *
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
