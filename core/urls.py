@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("users/", views.ListUser.as_view(), name="users"),
-    path("documents/", views.ListDocuments.as_view(), name="documents"),
+    path("users/", views.user_list_view, name="users"),
+    path("documents/", views.document_list_view, name="documents"),
+    path("documents/<int:pk>/", views.document_retrieve_view, name="document"),
 ]
