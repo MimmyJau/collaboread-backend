@@ -33,6 +33,19 @@ class DocumentRetrieveAPIView(generics.RetrieveAPIView):
 document_retrieve_view = DocumentRetrieveAPIView.as_view()
 
 
+class AnnotationListAPIView(generics.ListAPIView):
+    """View annotations with a document"""
+
+    serializer_class = AnnotationSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        document_uuid = self.kwargs["document_uuid"]
+        return Annotation.objects.filter(document__uuid=document_uuid)
+
+
+annotation_list_view = AnnotationListAPIView.as_view()
+
+
 class UserListAPIView(generics.ListAPIView):
     """View all users"""
 
