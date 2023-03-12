@@ -7,7 +7,7 @@ import uuid
 class Document(models.Model):
     """Text: Anything that can be read by a user."""
 
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -22,7 +22,7 @@ class Document(models.Model):
 class Annotation(models.Model):
     """Annotation: Contains highlight and optional comment."""
 
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)

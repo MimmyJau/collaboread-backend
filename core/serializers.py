@@ -10,6 +10,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = [
+            "id",
             "uuid",
             "user",
             "title",
@@ -28,6 +29,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Annotation
         fields = [
+            "id",
             "uuid",
             "user",
             "document",
