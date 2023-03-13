@@ -11,3 +11,5 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
