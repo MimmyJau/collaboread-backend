@@ -28,6 +28,7 @@ class DocumentRetrieveAPIView(generics.RetrieveAPIView):
 
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+    lookup_field = "uuid"
 
 
 document_retrieve_view = DocumentRetrieveAPIView.as_view()
