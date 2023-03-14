@@ -5,10 +5,10 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("users/", views.user_list_view, name="users"),
-    path("documents/", views.document_list_view, name="documents"),
-    path("documents/<uuid>/", views.document_retrieve_view, name="document"),
+    path("articles/", views.article_list_view, name="articles"),
+    path("articles/<uuid>/", views.article_retrieve_view, name="article"),
     path(
-        "annotations/<document_uuid>/",
+        "annotations/<article_uuid>/",
         views.annotation_list_create_view,
         name="annotations",
     ),

@@ -1,14 +1,14 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Document, Annotation
+from .models import Article, Annotation
 
 
-class DocumentSerializer(serializers.ModelSerializer):
-    """Serializer for Document model."""
+class ArticleSerializer(serializers.ModelSerializer):
+    """Serializer for Article model."""
 
     class Meta:
-        model = Document
+        model = Article
         fields = [
             "id",
             "uuid",
@@ -16,8 +16,8 @@ class DocumentSerializer(serializers.ModelSerializer):
             "title",
             "created_on",
             "updated_on",
-            "document_html",
-            "document_json",
+            "article_html",
+            "article_json",
             "is_published",
         ]
         read_only = ["uuid", "created_on", "updated_on"]
@@ -32,7 +32,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "user",
-            "document",
+            "article",
             "created_on",
             "updated_on",
             "highlight",

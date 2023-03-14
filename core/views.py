@@ -3,8 +3,8 @@ from django.http import HttpResponse
 
 from rest_framework import generics
 
-from .models import Annotation, Document
-from .serializers import AnnotationSerializer, DocumentSerializer, UserSerializer
+from .models import Annotation, Article
+from .serializers import AnnotationSerializer, ArticleSerializer, UserSerializer
 
 # Create your views here.
 
@@ -13,35 +13,35 @@ def index(request):
     return HttpResponse("Being Dope -> Chilling -> Having Fun -> Smiling -> Being Dope")
 
 
-class DocumentListAPIView(generics.ListAPIView):
-    """View all documents"""
+class ArticleListAPIView(generics.ListAPIView):
+    """View all articles"""
 
-    queryset = Document.objects.all()
-    serializer_class = DocumentSerializer
-
-
-document_list_view = DocumentListAPIView.as_view()
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
 
 
-class DocumentRetrieveAPIView(generics.RetrieveAPIView):
-    """View one document"""
+article_list_view = ArticleListAPIView.as_view()
 
-    queryset = Document.objects.all()
-    serializer_class = DocumentSerializer
+
+class ArticleRetrieveAPIView(generics.RetrieveAPIView):
+    """View one article"""
+
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
     lookup_field = "uuid"
 
 
-document_retrieve_view = DocumentRetrieveAPIView.as_view()
+article_retrieve_view = ArticleRetrieveAPIView.as_view()
 
 
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
-    """View annotations with a document"""
+    """View annotations with a article"""
 
     serializer_class = AnnotationSerializer
 
     def get_queryset(self, *args, **kwargs):
-        document_uuid = self.kwargs["document_uuid"]
-        return Annotation.objects.filter(document__uuid=document_uuid)
+        article_uuid = self.kwargs["article_uuid"]
+        return Annotation.objects.filter(article__uuid=article_uuid)
 
     def create(self, request, *args, **kwargs):
         print(request.data)
