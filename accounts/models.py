@@ -22,7 +22,9 @@ class User(AbstractUser):
 
     # Keep pk as auto-incrementing id for internal work.
     # Have uuid for external-facing.
-    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(
+        db_index=True, default=uuid.uuid4, editable=False, unique=True
+    )
     email = models.EmailField(blank=False, default="", unique=True)
     name = models.CharField(max_length=200, blank=True, default="")
 
