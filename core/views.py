@@ -34,7 +34,7 @@ class DocumentRetrieveAPIView(generics.RetrieveAPIView):
 document_retrieve_view = DocumentRetrieveAPIView.as_view()
 
 
-class AnnotationListAPIView(generics.ListAPIView):
+class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a document"""
 
     serializer_class = AnnotationSerializer
@@ -43,8 +43,12 @@ class AnnotationListAPIView(generics.ListAPIView):
         document_uuid = self.kwargs["document_uuid"]
         return Annotation.objects.filter(document__uuid=document_uuid)
 
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        return super().create(request, *args, **kwargs)
 
-annotation_list_view = AnnotationListAPIView.as_view()
+
+annotation_list_create_view = AnnotationListCreateAPIView.as_view()
 
 
 class UserListAPIView(generics.ListAPIView):

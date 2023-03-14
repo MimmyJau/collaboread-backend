@@ -9,7 +9,7 @@ urlpatterns = [
     path("documents/<uuid>/", views.document_retrieve_view, name="document"),
     path(
         "annotations/<document_uuid>/",
-        views.annotation_list_view,
+        views.annotation_list_create_view,
         name="annotations",
     ),
 ]
