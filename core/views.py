@@ -47,12 +47,7 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         """Temp conditional until we add auth"""
         if "user" not in request.data:
-            User = get_user_model()
-            me = User.objects.first()
-            request.data["user"] = me.id
-        print(request.data)
-        serializer.is_valid()
-        print(serializer.errors)
+            request.data["user"] = 1
         return super().create(request, *args, **kwargs)
 
 
