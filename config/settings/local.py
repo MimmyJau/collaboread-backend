@@ -12,4 +12,12 @@ DATABASES = {
     }
 }
 
+# For djangorestframework-cors-headers
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+
+
+# For django-debug-toolbars
+# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html
+INSTALLED_APPS.append("debug_toolbar")
+MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+INTERNAL_IPS = ["127.0.0.1"]
