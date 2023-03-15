@@ -37,18 +37,14 @@ article_retrieve_view = ArticleRetrieveAPIView.as_view()
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a article"""
 
+    # We also select "article" for SlugRelatedField
+    queryset = Annotation.objects.select_related("article")
     serializer_class = AnnotationSerializer
 
-    def get_queryset(self, *args, **kwargs):
-        article_uuid = self.kwargs["article_uuid"]
-        return Annotation.objects.filter(article__uuid=article_uuid)
-
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
         """Temp conditional until we add auth"""
         if "user" not in request.data:
             request.data["user"] = 1
-        print(request.data)
         return super().create(request, *args, **kwargs)
 
 
