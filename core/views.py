@@ -48,6 +48,7 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         """Temp conditional until we add auth"""
         if "user" not in request.data:
             request.data["user"] = 1
+        print(request.data)
         return super().create(request, *args, **kwargs)
 
 

@@ -24,7 +24,7 @@ class Annotation(models.Model):
 
     uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, to_field="uuid")
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     highlight = models.CharField(
