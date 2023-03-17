@@ -37,9 +37,16 @@ article_retrieve_view = ArticleRetrieveAPIView.as_view()
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a article"""
 
-    # We also select "article" for SlugRelatedField
-    queryset = Annotation.objects.select_related("article")
     serializer_class = AnnotationSerializer
+
+    def get_queryset(self):
+        qs = Annotation.objects.filter(
+            article__uuid=self.kwargs["article_uuid"]
+        )  # SELECT Annotations for a specific Article
+        qs = qs.select_related(
+            "article"
+        )  # SELECT Article info as well to remove duplicate query (for SlugRelatedField)
+        return qs
 
     def create(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
