@@ -6,8 +6,6 @@ from rest_framework import generics
 from .models import Annotation, Article
 from .serializers import AnnotationSerializer, ArticleSerializer, UserSerializer
 
-# Create your views here.
-
 
 def index(request):
     return HttpResponse("Being Dope -> Chilling -> Having Fun -> Smiling -> Being Dope")

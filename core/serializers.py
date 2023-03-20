@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from .models import Article, Annotation
+from .validators import JSONSchemaValidator
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -23,12 +24,35 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["uuid", "created_on", "updated_on"]
 
 
+HIGHLIGHT_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "backward": {"type": "boolean"},
+            "characterRange": {
+                "type": "object",
+                "properties": {
+                    "start": {"type": "integer"},
+                    "end": {"type": "integer"},
+                },
+            },
+        },
+    },
+}
+
+
 class AnnotationSerializer(serializers.ModelSerializer):
     """Serializer for Annotation model."""
 
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
+
+    def validate_highlight(self, highlight):
+        """Validate highlight"""
+        JSONSchemaValidator(HIGHLIGHT_SCHEMA)(highlight)
+        return highlight
 
     class Meta:
         model = Annotation
