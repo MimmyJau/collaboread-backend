@@ -27,7 +27,9 @@ class Annotation(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    highlight = models.JSONField(help_text="JSON serialized range by Rangy library")
+    highlight_start = models.PositiveIntegerField()
+    highlight_end = models.PositiveIntegerField()
+    highlight_backward = models.BooleanField(default=False)
     comment_html = models.TextField(
         blank=True, help_text="HTML / rich-text from rich-text editor."
     )
