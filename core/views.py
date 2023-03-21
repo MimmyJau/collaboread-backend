@@ -56,6 +56,17 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
 annotation_list_create_view = AnnotationListCreateAPIView.as_view()
 
 
+class AnnotationRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
+    """Retrive or Delete an annotation"""
+
+    queryset = Annotation.objects.all()
+    serializer_class = AnnotationSerializer
+    lookup_field = "uuid"
+
+
+annotation_retrieve_destroy_view = AnnotationRetrieveDestroyAPIView.as_view()
+
+
 class UserListAPIView(generics.ListAPIView):
     """View all users"""
 

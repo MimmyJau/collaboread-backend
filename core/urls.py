@@ -8,8 +8,13 @@ urlpatterns = [
     path("articles/", views.article_list_view, name="articles"),
     path("articles/<uuid>/", views.article_retrieve_view, name="article"),
     path(
-        "annotations/<article_uuid>/",
+        "articles/<article_uuid>/annotations/",
         views.annotation_list_create_view,
-        name="annotations",
+        name="get_annotations",
+    ),
+    path(
+        "annotations/<uuid>/",
+        views.annotation_retrieve_destroy_view,
+        name="retrieve_destroy_annotations",
     ),
 ]
