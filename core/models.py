@@ -22,7 +22,7 @@ class Article(models.Model):
 class Annotation(models.Model):
     """Annotation: Contains highlight and optional comment."""
 
-    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)

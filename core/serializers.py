@@ -46,7 +46,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "comment_json",
             "is_public",
         ]
-        read_only = ["uuid", "created_on", "updated_on"]
+        read_only = ["created_on", "updated_on"]
 
 
 class UserSerializer(serializers.ModelSerializer):
