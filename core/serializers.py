@@ -20,7 +20,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "article_json",
             "is_published",
         ]
-        read_only = ["uuid", "created_on", "updated_on"]
+        read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
 class AnnotationSerializer(serializers.ModelSerializer):
@@ -29,6 +29,12 @@ class AnnotationSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
+
+    def validate(self, data):
+        """Ensure highlight contains at least one character"""
+        if data["highlight_start"] >= data["highlight_end"]:
+            raise serializers.ValidationError("End must be greater than start")
+        return data
 
     class Meta:
         model = Annotation
@@ -46,7 +52,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "comment_json",
             "is_public",
         ]
-        read_only = ["created_on", "updated_on"]
+        read_only = ["id", "created_on", "updated_on"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -66,3 +72,4 @@ class UserSerializer(serializers.ModelSerializer):
             "is_staff",
             "is_active",
         ]
+        read_only = ["id", "uuid", "date_joined", "is_superuser", "is_staff"]
