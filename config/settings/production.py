@@ -7,7 +7,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     "collaboread.herokuapp.com",
-    "https://collaboread-frontend.vercel.app",
+    "collaboread-frontend.vercel.app",
 ]
 
 # Database
