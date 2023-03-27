@@ -7,8 +7,10 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     "collaboread.herokuapp.com",
-    "collaboread-frontend.vercel.app",
 ]
+
+# For djangorestframework-cors-headers
+CORS_ALLOWED_ORIGINS = ["collaboread-frontend.vercel.app"]
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
