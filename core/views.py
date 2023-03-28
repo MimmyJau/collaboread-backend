@@ -56,15 +56,24 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
 annotation_list_create_view = AnnotationListCreateAPIView.as_view()
 
 
-class AnnotationRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
-    """Retrive or Delete an annotation"""
+class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrive, Update, or Delete an annotation"""
 
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
     lookup_field = "uuid"
 
+    def update(self, request, *args, **kwargs):
+        """Temp conditional until we add auth"""
+        print(request.data)
+        if "user" not in request.data:
+            request.data["user"] = 1
+        return super().update(request, *args, **kwargs)
 
-annotation_retrieve_destroy_view = AnnotationRetrieveDestroyAPIView.as_view()
+
+annotation_retrieve_update_destroy_view = (
+    AnnotationRetrieveUpdateDestroyAPIView.as_view()
+)
 
 
 class UserListAPIView(generics.ListAPIView):

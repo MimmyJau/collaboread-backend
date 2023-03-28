@@ -14,7 +14,7 @@ urlpatterns = [
     ),
     path(
         "annotations/<uuid>/",
-        views.annotation_retrieve_destroy_view,
-        name="retrieve_destroy_annotations",
+        views.annotation_retrieve_update_destroy_view,
+        name="retrieve_update_destroy_annotations",
     ),
 ]
