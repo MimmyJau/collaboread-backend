@@ -5,15 +5,9 @@ from django.db import models
 
 
 class CustomUserManager(UserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        email = self.normalize_email(email)
+    def create_user(self, username, email, password=None, **extra_fields):
         super().create_user(
-            username=email, email=email, password=password, **extra_fields
-        )
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        super().create_superuser(
-            username=email, email=email, password=password, **extra_fields
+            username=username, email=email, password=password, **extra_fields
         )
 
 
@@ -30,7 +24,7 @@ class User(AbstractUser):
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = []
 

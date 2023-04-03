@@ -11,10 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "username",
-            "date_joined",
-            "name",
-            "first_name",
-            "last_name",
             "email",
+            "date_joined",
         ]
         read_only = ["id", "uuid", "date_joined", "is_superuser", "is_staff"]
