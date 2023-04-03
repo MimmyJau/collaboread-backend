@@ -3,8 +3,9 @@ from django.http import HttpResponse
 
 from rest_framework import generics
 
+from accounts.serializers import UserSerializer
 from .models import Annotation, Article
-from .serializers import AnnotationSerializer, ArticleSerializer, UserSerializer
+from .serializers import AnnotationSerializer, ArticleSerializer
 
 
 def index(request):
