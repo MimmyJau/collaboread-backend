@@ -10,8 +10,8 @@ class UserAdmin(BaseUserAdmin):
     # Copied and pasted from ../django/contrib/auth/admin.py
     # Requires import gettext_lazy as _
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email")}),
+        (None, {"fields": ("username", "email", "password")}),
+        (_("Personal info"), {"fields": ("name",)}),
         (
             _("Permissions"),
             {
