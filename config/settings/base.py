@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "core",
     "accounts",
+    "dj_rest_auth",
 ]
 
 SITE_ID = 1
