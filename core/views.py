@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 
 from rest_framework import generics
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
 from .models import Annotation, Article
@@ -27,8 +27,7 @@ article_list_view = ArticleListAPIView.as_view()
 class ArticleRetrieveAPIView(generics.RetrieveAPIView):
     """View one article"""
 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
@@ -40,6 +39,8 @@ article_retrieve_view = ArticleRetrieveAPIView.as_view()
 
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a article"""
+
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
 
     serializer_class = AnnotationSerializer
 
