@@ -46,7 +46,8 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = Annotation.objects.filter(
-            article__uuid=self.kwargs["article_uuid"]
+            article__uuid=self.kwargs["article_uuid"],
+            is_public=True,
         )  # SELECT Annotations for a specific Article
         qs = qs.select_related(
             "article"
