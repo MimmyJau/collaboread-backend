@@ -2,9 +2,12 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 
 from rest_framework import generics
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from accounts.serializers import UserSerializer
 from .models import Annotation, Article
-from .serializers import AnnotationSerializer, ArticleSerializer, UserSerializer
+from .serializers import AnnotationSerializer, ArticleSerializer
 
 
 def index(request):
@@ -24,6 +27,8 @@ article_list_view = ArticleListAPIView.as_view()
 class ArticleRetrieveAPIView(generics.RetrieveAPIView):
     """View one article"""
 
+    permission_classes = [AllowAny]
+
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     lookup_field = "uuid"
@@ -35,11 +40,14 @@ article_retrieve_view = ArticleRetrieveAPIView.as_view()
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a article"""
 
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+
     serializer_class = AnnotationSerializer
 
     def get_queryset(self):
         qs = Annotation.objects.filter(
-            article__uuid=self.kwargs["article_uuid"]
+            article__uuid=self.kwargs["article_uuid"],
+            is_public=True,
         )  # SELECT Annotations for a specific Article
         qs = qs.select_related(
             "article"

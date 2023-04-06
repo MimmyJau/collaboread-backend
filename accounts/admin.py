@@ -5,19 +5,13 @@ from django.utils.translation import gettext_lazy as _
 from .models import User
 
 
-class UserCreationForm(forms.ModelForm):
-    class Meta:
-        fields = ("email", "password")
-
-
 class UserAdmin(BaseUserAdmin):
-    # add_form = UserCreationForm
     list_display = ("username", "name", "is_staff")
     # Copied and pasted from ../django/contrib/auth/admin.py
     # Requires import gettext_lazy as _
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email")}),
+        (None, {"fields": ("username", "email", "password")}),
+        (_("Personal info"), {"fields": ("name",)}),
         (
             _("Permissions"),
             {
@@ -31,6 +25,9 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+    )
+    add_fieldsets = (
+        (None, {"fields": ("username", "email", "password1", "password2")}),
     )
 
 

@@ -147,3 +147,7 @@ cython_debug/
 
 # vim
 *.*.sw[a-z]
+
+# Static files
+static/
+staticfiles/

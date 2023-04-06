@@ -18,11 +18,14 @@ class Article(models.Model):
     article_json = models.JSONField(help_text="JSON output from tiptap / ProseMirror.")
     is_published = models.BooleanField(help_text="If true, others can read it.")
 
+    def __str__(self):
+        return self.title + " by " + self.user.username
+
 
 class Annotation(models.Model):
     """Annotation: Contains highlight and optional comment."""
 
-    uuid = models.UUIDField(db_index=True, default=uuid.uuid4)
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)

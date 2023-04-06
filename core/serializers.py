@@ -53,23 +53,3 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "is_public",
         ]
         read_only = ["id", "created_on", "updated_on"]
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User Model."""
-
-    class Meta:
-        model = get_user_model()
-        fields = [
-            "id",
-            "uuid",
-            "username",
-            "date_joined",
-            "first_name",
-            "last_name",
-            "email",
-            "is_superuser",
-            "is_staff",
-            "is_active",
-        ]
-        read_only = ["id", "uuid", "date_joined", "is_superuser", "is_staff"]
