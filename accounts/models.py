@@ -5,10 +5,7 @@ from django.db import models
 
 
 class CustomUserManager(UserManager):
-    def create_user(self, username, email, password=None, **extra_fields):
-        super().create_user(
-            username=username, email=email, password=password, **extra_fields
-        )
+    pass
 
 
 class User(AbstractUser):
