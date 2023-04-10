@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     "core",
     "accounts",
     "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
 ]
 
 SITE_ID = 1
@@ -144,6 +148,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    "JSON_UNDERSCOREIZE": {"ignore_keys": ("password1", "password2")},
 }
 
 # Config for dj-rest-auth package. See link below for defaults.
@@ -151,3 +156,4 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     "USER_DETAILS_SERIALIZER": "accounts.serializers.UserSerializer",
 }
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
