@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from .models import Article, Annotation
+from accounts.serializers import PublicUserSerializer
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -26,6 +27,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 class AnnotationSerializer(serializers.ModelSerializer):
     """Serializer for Annotation model."""
 
+    user = PublicUserSerializer(read_only=True)
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
@@ -53,3 +55,24 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "is_public",
         ]
         read_only = ["id", "created_on", "updated_on"]
+
+
+class CharacterRangeSerializer(serializers.ModelSerializer):
+    """Serializer for character range object in highlight object."""
+
+    class Meta:
+        model = Annotation
+        fields = [
+            "highlight_start",
+            "highlight_end",
+        ]
+
+
+class HighlightSerializer(serializers.ModelSerializer):
+    """Serializer for Highlight object in frontend."""
+
+    character_range = CharacterRangeSerializer()
+
+    class Meta:
+        model = Annotation
+        fields = ["character_range", "highlight_backward"]

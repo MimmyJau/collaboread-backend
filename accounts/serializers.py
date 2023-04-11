@@ -15,3 +15,15 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
         ]
         read_only = ["id", "uuid", "date_joined", "is_superuser", "is_staff"]
+
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    """Serializer for Public-Facing User Model."""
+
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "uuid",
+            "username",
+        ]
+        read_only = ["uuid", "username"]
