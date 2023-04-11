@@ -29,9 +29,13 @@ class AnnotationSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), slug_field="uuid"
     )
+    username = serializers.SerializerMethodField(method_name="get_username")
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
+
+    def get_username(self, obj):
+        return obj.user.username
 
     def validate(self, data):
         """Ensure highlight contains at least one character"""
@@ -45,6 +49,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "user",
+            "username",
             "article",
             "created_on",
             "updated_on",
