@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
 from .models import Annotation, Article
+from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationReadSerializer,
     AnnotationWriteSerializer,
@@ -63,9 +64,7 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
-        print(request.data)
-        if "user" not in request.data:
-            request.data["user"] = "1d6ff5fb-e147-4c2b-8cdd-006e29d069f9"
+        request.data["user"] = request.user
         return super().create(request, *args, **kwargs)
 
 
@@ -75,14 +74,16 @@ annotation_list_create_view = AnnotationListCreateAPIView.as_view()
 class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """Retrive, Update, or Delete an annotation"""
 
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsOwnerOrReadOnly]
+
     queryset = Annotation.objects.all()
     serializer_class = AnnotationWriteSerializer
     lookup_field = "uuid"
 
     def update(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
-        if "user" not in request.data:
-            request.data["user"] = "1d6ff5fb-e147-4c2b-8cdd-006e29d069f9"
+        request.data["user"] = request.user
         return super().update(request, *args, **kwargs)
 
 
