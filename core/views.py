@@ -73,7 +73,6 @@ class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
 
     def update(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
-        print(request.data)
         if "user" not in request.data:
             request.data["user"] = 1
         return super().update(request, *args, **kwargs)
