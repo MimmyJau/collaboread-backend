@@ -7,7 +7,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
 from .models import Annotation, Article
-from .serializers import AnnotationSerializer, ArticleSerializer
+from .serializers import (
+    AnnotationReadSerializer,
+    AnnotationWriteSerializer,
+    ArticleSerializer,
+)
 
 
 def index(request):
@@ -42,8 +46,6 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
 
-    serializer_class = AnnotationSerializer
-
     def get_queryset(self):
         qs = Annotation.objects.filter(
             article__uuid=self.kwargs["article_uuid"],
@@ -54,10 +56,16 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         )  # SELECT Article info as well to remove duplicate query (for SlugRelatedField)
         return qs
 
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return AnnotationReadSerializer
+        return AnnotationWriteSerializer
+
     def create(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
+        print(request.data)
         if "user" not in request.data:
-            request.data["user"] = 1
+            request.data["user"] = "1d6ff5fb-e147-4c2b-8cdd-006e29d069f9"
         return super().create(request, *args, **kwargs)
 
 
@@ -68,13 +76,13 @@ class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
     """Retrive, Update, or Delete an annotation"""
 
     queryset = Annotation.objects.all()
-    serializer_class = AnnotationSerializer
+    serializer_class = AnnotationWriteSerializer
     lookup_field = "uuid"
 
     def update(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
         if "user" not in request.data:
-            request.data["user"] = 1
+            request.data["user"] = "1d6ff5fb-e147-4c2b-8cdd-006e29d069f9"
         return super().update(request, *args, **kwargs)
 
 
