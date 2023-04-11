@@ -6,7 +6,7 @@ from .models import User
 
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ("username", "name", "is_staff")
+    list_display = ("username", "uuid", "email", "is_staff")
     # Copied and pasted from ../django/contrib/auth/admin.py
     # Requires import gettext_lazy as _
     fieldsets = (

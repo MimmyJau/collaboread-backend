@@ -26,6 +26,9 @@ class ArticleSerializer(serializers.ModelSerializer):
 class AnnotationSerializer(serializers.ModelSerializer):
     """Serializer for Annotation model."""
 
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), slug_field="uuid"
+    )
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
