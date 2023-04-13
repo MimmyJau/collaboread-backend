@@ -21,7 +21,14 @@ class ArticleAdmin(admin.ModelAdmin):
 
 
 class AnnotationAdmin(admin.ModelAdmin):
-    list_display = ("article", "user", "highlight_start", "highlight_end", "created_on")
+    list_display = (
+        "article",
+        "id",
+        "user",
+        "highlight_start",
+        "highlight_end",
+        "created_on",
+    )
     list_filter = ("article", "user", "created_on")
 
     fields = [
