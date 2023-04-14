@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Article, Annotation
+from .models import Article, Annotation, Comment
 from accounts.serializers import PublicUserSerializer
 
 
@@ -24,6 +24,58 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
+class CommentReadSerializer(serializers.ModelSerializer):
+    """Serializer for Comment model."""
+
+    user = PublicUserSerializer(read_only=True)
+    annotation = serializers.SlugRelatedField(
+        queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
+    )
+    reply_to = serializers.SlugRelatedField(
+        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
+    )
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "uuid",
+            "user",
+            "annotation",
+            "reply_to",
+            "created_on",
+            "updated_on",
+            "comment_html",
+            "comment_json",
+        ]
+        read_only = ["uuid", "created_on", "updated_on"]
+
+
+class CommentWriteSerializer(serializers.ModelSerializer):
+    """Serializer for Comment model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+    reply_to = serializers.SlugRelatedField(
+        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
+    )
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "user",
+            "annotation",
+            "reply_to",
+            "created_on",
+            "updated_on",
+            "comment_html",
+            "comment_json",
+        ]
+        read_only = ["uuid", "created_on", "updated_on"]
+
+
 class AnnotationReadSerializer(serializers.ModelSerializer):
     """Serializer for Reading Annotation model."""
 
@@ -31,12 +83,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
-
-    def validate(self, data):
-        """Ensure highlight contains at least one character"""
-        if data["highlight_start"] >= data["highlight_end"]:
-            raise serializers.ValidationError("End must be greater than start")
-        return data
+    comments = CommentReadSerializer(read_only=True, many=True)
 
     class Meta:
         model = Annotation
@@ -50,9 +97,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
             "highlight_start",
             "highlight_end",
             "highlight_backward",
-            "comment_html",
-            "comment_json",
-            "is_public",
+            "comments",
         ]
         read_only = ["id", "user", "created_on", "updated_on"]
 
@@ -66,12 +111,13 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
+    comments = CommentWriteSerializer(many=True, read_only=True)
 
-    def validate(self, data):
+    def validate(self, attrs):
         """Ensure highlight contains at least one character"""
-        if data["highlight_start"] >= data["highlight_end"]:
+        if attrs["highlight_start"] >= attrs["highlight_end"]:
             raise serializers.ValidationError("End must be greater than start")
-        return data
+        return attrs
 
     class Meta:
         model = Annotation
@@ -84,28 +130,5 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
             "highlight_start",
             "highlight_end",
             "highlight_backward",
-            "comment_html",
-            "comment_json",
-            "is_public",
+            "comments",
         ]
-
-
-class CharacterRangeSerializer(serializers.ModelSerializer):
-    """Serializer for character range object in highlight object."""
-
-    class Meta:
-        model = Annotation
-        fields = [
-            "highlight_start",
-            "highlight_end",
-        ]
-
-
-class HighlightSerializer(serializers.ModelSerializer):
-    """Serializer for Highlight object in frontend."""
-
-    character_range = CharacterRangeSerializer()
-
-    class Meta:
-        model = Annotation
-        fields = ["character_range", "highlight_backward"]

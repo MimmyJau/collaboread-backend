@@ -40,7 +40,9 @@ class Comment(models.Model):
 
     uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    annotation = models.ForeignKey(Annotation, on_delete=models.CASCADE)
+    annotation = models.ForeignKey(
+        Annotation, on_delete=models.CASCADE, related_name="comments"
+    )
     reply_to = models.ForeignKey(
         "self",
         on_delete=models.CASCADE,
