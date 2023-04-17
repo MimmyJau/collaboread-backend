@@ -1,10 +1,10 @@
-from sre_constants import IN_LOC_IGNORE
+import datetime
+import uuid
+
 from django.conf import settings
 from django.db import models
 
 from treebeard.mp_tree import MP_Node
-
-import uuid
 
 
 class Article(models.Model):
@@ -38,31 +38,7 @@ class Annotation(models.Model):
     highlight_backward = models.BooleanField(default=False)
 
 
-class Comment(models.Model):
-    """Comments: Can be either main post or replies."""
-
-    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    annotation = models.ForeignKey(
-        Annotation, on_delete=models.CASCADE, related_name="comments"
-    )
-    reply_to = models.ForeignKey(
-        "self",
-        on_delete=models.CASCADE,
-        null=True,
-        help_text="If null, this is a main post.",
-    )
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
-    comment_html = models.TextField(
-        blank=True, help_text="HTML / rich-text from rich-text editor."
-    )
-    comment_json = models.JSONField(
-        blank=True, help_text="JSON output from tiptap / ProseMirror.", null=True
-    )
-
-
-class CommentTree(MP_Node):
+class Comment(MP_Node):
     """Comments: Can be either main post or replies."""
 
     node_order_by = ["created_on"]
@@ -75,7 +51,7 @@ class CommentTree(MP_Node):
     annotation = models.ForeignKey(
         Annotation, on_delete=models.CASCADE, related_name="comments_tree"
     )
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(default=datetime.datetime.now)
     updated_on = models.DateTimeField(auto_now=True)
     comment_html = models.TextField(
         blank=True, help_text="HTML output from rich-text editor."
