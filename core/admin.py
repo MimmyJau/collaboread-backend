@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Annotation, Comment
+from .models import Article, Annotation, Comment, CommentTree
 
 
 # Register your models here.
@@ -54,6 +54,7 @@ class CommentAdmin(admin.ModelAdmin):
         "created_on",
         "user",
         "annotation",
+        "reply_to",
         "comment_html",
         "comment_json",
     ]
@@ -63,3 +64,4 @@ class CommentAdmin(admin.ModelAdmin):
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Annotation, AnnotationAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(CommentTree)

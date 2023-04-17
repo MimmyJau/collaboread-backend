@@ -1,5 +1,8 @@
+from sre_constants import IN_LOC_IGNORE
 from django.conf import settings
 from django.db import models
+
+from treebeard.mp_tree import MP_Node
 
 import uuid
 
@@ -57,3 +60,32 @@ class Comment(models.Model):
     comment_json = models.JSONField(
         blank=True, help_text="JSON output from tiptap / ProseMirror.", null=True
     )
+
+
+class CommentTree(MP_Node):
+    """Comments: Can be either main post or replies."""
+
+    node_order_by = ["created_on"]
+
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False
+    )
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    annotation = models.ForeignKey(
+        Annotation, on_delete=models.CASCADE, related_name="comments_tree"
+    )
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    comment_html = models.TextField(
+        blank=True, help_text="HTML output from rich-text editor."
+    )
+    comment_json = models.JSONField(
+        blank=True, help_text="JSON output from rich-text editor.", null=True
+    )
+    comment_text = models.TextField(
+        blank=True, help_text="Plain-text output from rich-text editor.", default=""
+    )
+
+    def __str__(self):
+        return self.comment_html
