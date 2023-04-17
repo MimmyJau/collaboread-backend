@@ -16,4 +16,8 @@ urlpatterns = [
         views.annotation_retrieve_update_destroy_view,
         name="retrieve_update_destroy_annotations",
     ),
+    path("comments/", views.comment_list_create_view, name="comments"),
+    path(
+        "comments/<uuid>/", views.comment_retrieve_update_destroy_view, name="comment"
+    ),
 ]

@@ -1,7 +1,10 @@
+import datetime
+import uuid
+
 from django.conf import settings
 from django.db import models
 
-import uuid
+from treebeard.mp_tree import MP_Node
 
 
 class Article(models.Model):
@@ -33,10 +36,32 @@ class Annotation(models.Model):
     highlight_start = models.PositiveIntegerField()
     highlight_end = models.PositiveIntegerField()
     highlight_backward = models.BooleanField(default=False)
+
+
+class Comment(MP_Node):
+    """Comments: Can be either main post or replies."""
+
+    node_order_by = ["created_on"]
+
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False
+    )
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    annotation = models.ForeignKey(
+        Annotation, on_delete=models.CASCADE, related_name="comments_tree"
+    )
+    created_on = models.DateTimeField(default=datetime.datetime.now)
+    updated_on = models.DateTimeField(auto_now=True)
     comment_html = models.TextField(
-        blank=True, help_text="HTML / rich-text from rich-text editor."
+        blank=True, help_text="HTML output from rich-text editor."
     )
     comment_json = models.JSONField(
-        blank=True, help_text="JSON output from tiptap / ProseMirror.", null=True
+        blank=True, help_text="JSON output from rich-text editor.", null=True
     )
-    is_public = models.BooleanField(help_text="If true, others can read it.")
+    comment_text = models.TextField(
+        blank=True, help_text="Plain-text output from rich-text editor.", default=""
+    )
+
+    def __str__(self):
+        return self.comment_html

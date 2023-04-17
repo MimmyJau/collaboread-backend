@@ -6,12 +6,14 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
-from .models import Annotation, Article
+from .models import Annotation, Article, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationReadSerializer,
     AnnotationWriteSerializer,
     ArticleSerializer,
+    CommentReadSerializer,
+    CommentWriteSerializer,
 )
 
 
@@ -50,7 +52,6 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         qs = Annotation.objects.filter(
             article__uuid=self.kwargs["article_uuid"],
-            is_public=True,
         )  # SELECT Annotations for a specific Article
         qs = qs.select_related(
             "article"
@@ -100,3 +101,38 @@ class UserListAPIView(generics.ListAPIView):
 
 
 user_list_view = UserListAPIView.as_view()
+
+
+class CommentListCreateAPIView(generics.ListCreateAPIView):
+    """List your comments and create a comment."""
+
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return CommentReadSerializer
+        return CommentWriteSerializer
+
+    def get_queryset(self):
+        qs = Comment.objects.filter(user=self.request.user)
+        return qs
+
+    def create(self, request, *args, **kwargs):
+        print("In create: ", request.data)
+        request.data["user"] = request.user
+        return super().create(request, *args, **kwargs)
+
+
+comment_list_create_view = CommentListCreateAPIView.as_view()
+
+
+class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrive, Update, or Delete a comment."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentWriteSerializer
+    lookup_field = "uuid"
+
+
+comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_view()
