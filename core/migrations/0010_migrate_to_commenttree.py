@@ -3,6 +3,24 @@
 from django.db import migrations
 from treebeard.numconv import NumConv
 
+"""
+GOAL: Migrate old Comment model to new Comment model inheriting from MP_Node.
+WHY: Treebeard's MP_Node model is a better fit for self-referential objects.
+COMPLICATION: Treebeard's MP_Node uses custom manager that has a function
+called add_root() for adding a root node. In migrations, we don't have 
+access to custom manager functions.
+    SOURCE: https://github.com/django-treebeard/django-treebeard/issues/264
+SOLUTION: Manually create each object and save. The only complicated 
+attribute is path, which has a custom function to generate it. The
+other attributes, such as depth, numchild, etc. are easy to calculate 
+since we're just adding root. To be totally honest, I don't know if 
+this will actually work since I fucked up the migration initially 
+by forgetting to include .save(), and I couldn't revert since psycopg3 
+was giving an error (something about duplicating keys). Probably will
+have to flush production db anyways. Triggered.
+    SOURCE: https://stackoverflow.com/a/37685925
+"""
+
 # from april fool's rfc 1924
 BASE85 = (
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
