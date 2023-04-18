@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from rest_framework_recursive.fields import RecursiveField
+
 from .models import Article, Annotation, Comment
 from accounts.serializers import PublicUserSerializer
 
@@ -24,32 +26,6 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
-class CommentBaseSerializer(serializers.ModelSerializer):
-    """Serializer for Comment model."""
-
-    user = serializers.SlugRelatedField(
-        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
-    )
-    annotation = serializers.SlugRelatedField(
-        queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
-    )
-
-    class Meta:
-        model = Comment
-        fields = [
-            "id",
-            "user",
-            "article",
-            "annotation",
-            "created_on",
-            "updated_on",
-            "comment_html",
-            "comment_json",
-            "comment_text",
-        ]
-        read_only = ["uuid", "created_on", "updated_on"]
-
-
 class CommentReadSerializer(serializers.ModelSerializer):
     """Serializer for Comment model."""
 
@@ -57,8 +33,8 @@ class CommentReadSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    parent = CommentBaseSerializer()
-    children = CommentBaseSerializer(many=True)
+    parent = serializers.PrimaryKeyRelatedField(read_only=True)
+    children = RecursiveField(many=True)
 
     class Meta:
         model = Comment
@@ -88,8 +64,8 @@ class CommentWriteSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    parent = CommentBaseSerializer()
-    children = CommentBaseSerializer(many=True)
+    parent = serializers.PrimaryKeyRelatedField(read_only=True)
+    children = RecursiveField(many=True)
 
     class Meta:
         model = Comment
