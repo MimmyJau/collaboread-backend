@@ -24,6 +24,32 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
+class CommentBaseSerializer(serializers.ModelSerializer):
+    """Serializer for Comment model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+    annotation = serializers.SlugRelatedField(
+        queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
+    )
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "user",
+            "article",
+            "annotation",
+            "created_on",
+            "updated_on",
+            "comment_html",
+            "comment_json",
+            "comment_text",
+        ]
+        read_only = ["uuid", "created_on", "updated_on"]
+
+
 class CommentReadSerializer(serializers.ModelSerializer):
     """Serializer for Comment model."""
 
@@ -31,9 +57,8 @@ class CommentReadSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    reply_to = serializers.SlugRelatedField(
-        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
-    )
+    parent = CommentBaseSerializer()
+    children = CommentBaseSerializer(many=True)
 
     class Meta:
         model = Comment
@@ -41,12 +66,15 @@ class CommentReadSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "user",
+            "article",
             "annotation",
-            "reply_to",
+            "parent",
+            "children",
             "created_on",
             "updated_on",
             "comment_html",
             "comment_json",
+            "comment_text",
         ]
         read_only = ["uuid", "created_on", "updated_on"]
 
@@ -57,21 +85,26 @@ class CommentWriteSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
-    reply_to = serializers.SlugRelatedField(
-        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
+    annotation = serializers.SlugRelatedField(
+        queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
+    parent = CommentBaseSerializer()
+    children = CommentBaseSerializer(many=True)
 
     class Meta:
         model = Comment
         fields = [
             "id",
             "user",
+            "article",
             "annotation",
-            "reply_to",
+            "parent",
+            "children",
             "created_on",
             "updated_on",
             "comment_html",
             "comment_json",
+            "comment_text",
         ]
         read_only = ["uuid", "created_on", "updated_on"]
 

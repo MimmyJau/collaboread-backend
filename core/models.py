@@ -63,5 +63,15 @@ class Comment(MP_Node):
         blank=True, help_text="Plain-text output from rich-text editor.", default=""
     )
 
+    @property
+    def parent(self):
+        print("Parent:", self.get_parent())
+        return self.get_parent()
+
+    @property
+    def children(self):
+        print("Children:", self.get_children())
+        return self.get_children()
+
     def __str__(self):
         return self.comment_html
