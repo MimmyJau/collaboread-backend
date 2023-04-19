@@ -1,14 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-from rest_framework.authtoken.models import Token
-
-from core.models import Article, Annotation, Comment
-
-
-# Create your tests here.
+from core.models import Article, Annotation
 
 
 class CommentAPITest(TestCase):
@@ -30,14 +24,6 @@ class CommentAPITest(TestCase):
             highlight_start=0,
             highlight_end=10,
         )
-        self.comment = Comment(
-            user=self.user,
-            article=self.article,
-            annotation=self.annotation,
-            comment_html="<p>Test Comment</p>",
-            comment_json={"test": "Test Comment JSON"},
-            comment_text="Test Comment",
-        )
         self.comment = {
             "user": self.user.uuid,
             "article": self.article.uuid,
@@ -51,3 +37,12 @@ class CommentAPITest(TestCase):
         self.client.login(username="testuser", password="testpassword")
         response = self.client.post("/api/comments/", self.comment, format="json")
         self.assertEqual(response.status_code, 201)
+
+    def test_get_annotation(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post("/api/comments/", self.comment, format="json")
+        route = f"/api/articles/{self.article.uuid}/annotations/"
+        response = self.client.get(route)
+        self.assertEqual(response.status_code, 200)
+        print("response data:", response.data[0])
+        self.assertEqual(response.data[0]["comment_html"], "<p>Test Comment</p>")
