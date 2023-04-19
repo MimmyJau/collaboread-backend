@@ -33,7 +33,9 @@ class CommentReadSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    parent = serializers.PrimaryKeyRelatedField(read_only=True)
+    parent = serializers.SlugRelatedField(
+        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
+    )
     children = RecursiveField(many=True)
 
     class Meta:
@@ -61,11 +63,18 @@ class CommentWriteSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
+    article = serializers.SlugRelatedField(
+        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+    )
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    parent = serializers.PrimaryKeyRelatedField(read_only=True)
-    children = RecursiveField(many=True)
+    parent = serializers.SlugRelatedField(
+        queryset=Comment.objects.all(),
+        read_only=False,
+        slug_field="uuid",
+        required=False,
+    )
 
     class Meta:
         model = Comment
@@ -75,7 +84,6 @@ class CommentWriteSerializer(serializers.ModelSerializer):
             "article",
             "annotation",
             "parent",
-            "children",
             "created_on",
             "updated_on",
             "comment_html",
@@ -83,6 +91,13 @@ class CommentWriteSerializer(serializers.ModelSerializer):
             "comment_text",
         ]
         read_only = ["uuid", "created_on", "updated_on"]
+
+    def create(self, validated_data):
+        if "parent" in validated_data:
+            parent = Comment.objects.get(uuid=validated_data["parent"].uuid)
+            validated_data["parent"] = parent
+            return parent.add_child(**validated_data)
+        return Comment.add_root(**validated_data)
 
 
 class AnnotationReadSerializer(serializers.ModelSerializer):
