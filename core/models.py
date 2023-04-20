@@ -49,7 +49,7 @@ class Comment(MP_Node):
     )
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     annotation = models.ForeignKey(
-        Annotation, on_delete=models.CASCADE, related_name="comments_tree"
+        Annotation, on_delete=models.CASCADE, related_name="comments"
     )
     created_on = models.DateTimeField(default=datetime.datetime.now)
     updated_on = models.DateTimeField(auto_now=True)
