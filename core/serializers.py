@@ -26,38 +26,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
-class CommentReadSerializer(serializers.ModelSerializer):
-    """Serializer for Comment model."""
-
-    user = PublicUserSerializer(read_only=True)
-    annotation = serializers.SlugRelatedField(
-        queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
-    )
-    parent = serializers.SlugRelatedField(
-        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
-    )
-    children = RecursiveField(many=True)
-
-    class Meta:
-        model = Comment
-        fields = [
-            "id",
-            "uuid",
-            "user",
-            "article",
-            "annotation",
-            "parent",
-            "children",
-            "created_on",
-            "updated_on",
-            "comment_html",
-            "comment_json",
-            "comment_text",
-        ]
-        read_only = ["uuid", "created_on", "updated_on"]
-
-
-class CommentWriteSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     """Serializer for Comment model."""
 
     user = serializers.SlugRelatedField(
@@ -92,6 +61,7 @@ class CommentWriteSerializer(serializers.ModelSerializer):
         model = Comment
         fields = [
             "id",
+            "uuid",
             "user",
             "article",
             "annotation",
@@ -125,7 +95,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
-    comments = CommentReadSerializer(read_only=True, many=True)
+    comments = CommentSerializer(read_only=True, many=True)
 
     class Meta:
         model = Annotation
@@ -153,7 +123,7 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
-    comments = CommentWriteSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
     def validate(self, attrs):
         """Ensure highlight contains at least one character"""
