@@ -119,7 +119,6 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
         return qs
 
     def create(self, request, *args, **kwargs):
-        print("In create: ", request.data)
         request.data["user"] = request.user
         return super().create(request, *args, **kwargs)
 
@@ -133,6 +132,10 @@ class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
     queryset = Comment.objects.all()
     serializer_class = CommentWriteSerializer
     lookup_field = "uuid"
+
+    def update(self, request, *args, **kwargs):
+        request.data["user"] = request.user
+        return super().update(request, *args, **kwargs)
 
 
 comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_view()
