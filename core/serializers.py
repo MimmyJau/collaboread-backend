@@ -70,11 +70,10 @@ class CommentWriteSerializer(serializers.ModelSerializer):
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
     parent = serializers.SlugRelatedField(
-        queryset=Comment.objects.all(),
-        read_only=False,
+        read_only=True,
         slug_field="uuid",
-        required=False,
     )
+    parent_uuid = serializers.UUIDField(required=True, allow_null=True, write_only=True)
 
     class Meta:
         model = Comment
@@ -84,6 +83,7 @@ class CommentWriteSerializer(serializers.ModelSerializer):
             "article",
             "annotation",
             "parent",
+            "parent_uuid",
             "created_on",
             "updated_on",
             "comment_html",
@@ -93,9 +93,9 @@ class CommentWriteSerializer(serializers.ModelSerializer):
         read_only = ["uuid", "created_on", "updated_on"]
 
     def create(self, validated_data):
-        if "parent" in validated_data:
-            parent = Comment.objects.get(uuid=validated_data["parent"].uuid)
-            validated_data["parent"] = parent
+        parent_uuid = validated_data.pop("parent_uuid", None)
+        if parent_uuid is not None:
+            parent = Comment.objects.get(uuid=parent_uuid)
             return parent.add_child(**validated_data)
         return Comment.add_root(**validated_data)
 
