@@ -69,11 +69,24 @@ class CommentWriteSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    parent = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field="uuid",
-    )
-    parent_uuid = serializers.UUIDField(required=True, allow_null=True, write_only=True)
+
+    """
+    Since parent field is read-only in MP_Tree, we have to use a
+    custom field parent_uuid that can do both read and write.
+
+    If we didn't use custom field and tried to use built-in parent field,
+    we would have access to the parent field when deciding whether to
+    use add_root or add-child in custom `.create()` method (since parent
+    field is read-only).
+
+    Notes:
+    - In custom `.create()` method, we only use parent_uuid for deciding
+      which django-treebeard method to call,
+    - In custom `.to_representation()` method, we fetch uuid to include
+      in json response.
+    """
+    parent_uuid = serializers.UUIDField(required=True, allow_null=True)
+    children = RecursiveField(many=True, read_only=True)
 
     class Meta:
         model = Comment
@@ -82,8 +95,8 @@ class CommentWriteSerializer(serializers.ModelSerializer):
             "user",
             "article",
             "annotation",
-            "parent",
             "parent_uuid",
+            "children",
             "created_on",
             "updated_on",
             "comment_html",
@@ -98,6 +111,11 @@ class CommentWriteSerializer(serializers.ModelSerializer):
             parent = Comment.objects.get(uuid=parent_uuid)
             return parent.add_child(**validated_data)
         return Comment.add_root(**validated_data)
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep["parent_uuid"] = instance.parent.uuid if instance.parent else None
+        return rep
 
 
 class AnnotationReadSerializer(serializers.ModelSerializer):

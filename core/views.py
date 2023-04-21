@@ -111,7 +111,7 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == "GET":
-            return CommentReadSerializer
+            return CommentWriteSerializer
         return CommentWriteSerializer
 
     def get_queryset(self):
