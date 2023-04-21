@@ -124,6 +124,9 @@ comment_list_create_view = CommentListCreateAPIView.as_view()
 class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """Retrive, Update, or Delete a comment."""
 
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsOwnerOrReadOnly]
+
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_field = "uuid"
