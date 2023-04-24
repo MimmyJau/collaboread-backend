@@ -49,7 +49,7 @@ class Comment(MP_Node):
     )
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     annotation = models.ForeignKey(
-        Annotation, on_delete=models.CASCADE, related_name="comments_tree"
+        Annotation, on_delete=models.CASCADE, related_name="comments"
     )
     created_on = models.DateTimeField(default=datetime.datetime.now)
     updated_on = models.DateTimeField(auto_now=True)
@@ -62,6 +62,14 @@ class Comment(MP_Node):
     comment_text = models.TextField(
         blank=True, help_text="Plain-text output from rich-text editor.", default=""
     )
+
+    @property
+    def parent(self):
+        return self.get_parent()
+
+    @property
+    def children(self):
+        return self.get_children()
 
     def __str__(self):
         return self.comment_html

@@ -12,8 +12,7 @@ from .serializers import (
     AnnotationReadSerializer,
     AnnotationWriteSerializer,
     ArticleSerializer,
-    CommentReadSerializer,
-    CommentWriteSerializer,
+    CommentSerializer,
 )
 
 
@@ -108,18 +107,13 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return CommentReadSerializer
-        return CommentWriteSerializer
+    serializer_class = CommentSerializer
 
     def get_queryset(self):
         qs = Comment.objects.filter(user=self.request.user)
         return qs
 
     def create(self, request, *args, **kwargs):
-        print("In create: ", request.data)
         request.data["user"] = request.user
         return super().create(request, *args, **kwargs)
 
@@ -130,9 +124,16 @@ comment_list_create_view = CommentListCreateAPIView.as_view()
 class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """Retrive, Update, or Delete a comment."""
 
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsOwnerOrReadOnly]
+
     queryset = Comment.objects.all()
-    serializer_class = CommentWriteSerializer
+    serializer_class = CommentSerializer
     lookup_field = "uuid"
+
+    def update(self, request, *args, **kwargs):
+        request.data["user"] = request.user
+        return super().update(request, *args, **kwargs)
 
 
 comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_view()

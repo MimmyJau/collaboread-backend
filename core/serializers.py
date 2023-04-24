@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from rest_framework_recursive.fields import RecursiveField
+
 from .models import Article, Annotation, Comment
 from accounts.serializers import PublicUserSerializer
 
@@ -24,16 +26,36 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
-class CommentReadSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     """Serializer for Comment model."""
 
-    user = PublicUserSerializer(read_only=True)
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+    article = serializers.SlugRelatedField(
+        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+    )
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    reply_to = serializers.SlugRelatedField(
-        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
-    )
+
+    """
+    Since parent field is read-only in MP_Tree, we have to use a
+    custom field parent_uuid that can do both read and write.
+
+    If we didn't use custom field and tried to use built-in parent field,
+    we would have access to the parent field when deciding whether to
+    use add_root or add-child in custom `.create()` method (since parent
+    field is read-only).
+
+    Notes:
+    - In custom `.create()` method, we only use parent_uuid for deciding
+      which django-treebeard method to call,
+    - In custom `.to_representation()` method, we fetch uuid to include
+      in json response.
+    """
+    parent_uuid = serializers.UUIDField(required=True, allow_null=True)
+    children = RecursiveField(many=True, read_only=True)
 
     class Meta:
         model = Comment
@@ -41,39 +63,29 @@ class CommentReadSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "user",
+            "article",
             "annotation",
-            "reply_to",
+            "parent_uuid",
+            "children",
             "created_on",
             "updated_on",
             "comment_html",
             "comment_json",
+            "comment_text",
         ]
         read_only = ["uuid", "created_on", "updated_on"]
 
+    def create(self, validated_data):
+        parent_uuid = validated_data.pop("parent_uuid", None)
+        if parent_uuid is not None:
+            parent = Comment.objects.get(uuid=parent_uuid)
+            return parent.add_child(**validated_data)
+        return Comment.add_root(**validated_data)
 
-class CommentWriteSerializer(serializers.ModelSerializer):
-    """Serializer for Comment model."""
-
-    user = serializers.SlugRelatedField(
-        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
-    )
-    reply_to = serializers.SlugRelatedField(
-        queryset=Comment.objects.all(), read_only=False, slug_field="uuid"
-    )
-
-    class Meta:
-        model = Comment
-        fields = [
-            "id",
-            "user",
-            "annotation",
-            "reply_to",
-            "created_on",
-            "updated_on",
-            "comment_html",
-            "comment_json",
-        ]
-        read_only = ["uuid", "created_on", "updated_on"]
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep["parent_uuid"] = instance.parent.uuid if instance.parent else None
+        return rep
 
 
 class AnnotationReadSerializer(serializers.ModelSerializer):
@@ -83,7 +95,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
-    comments = CommentReadSerializer(read_only=True, many=True)
+    comments = CommentSerializer(read_only=True, many=True)
 
     class Meta:
         model = Annotation
@@ -111,7 +123,7 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="uuid"
     )
-    comments = CommentWriteSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
     def validate(self, attrs):
         """Ensure highlight contains at least one character"""
