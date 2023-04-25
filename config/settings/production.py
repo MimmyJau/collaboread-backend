@@ -13,6 +13,7 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     "https://collaboread-frontend.vercel.app",
     "https://collaboread.app",
+    "https://www.collaboread.app",
 ]
 
 # Database
