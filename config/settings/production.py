@@ -10,7 +10,10 @@ ALLOWED_HOSTS = [
 ]
 
 # For djangorestframework-cors-headers
-CORS_ALLOWED_ORIGINS = ["https://collaboread-frontend.vercel.app"]
+CORS_ALLOWED_ORIGINS = [
+    "https://collaboread-frontend.vercel.app",
+    "https://collaboread.app",
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
