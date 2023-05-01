@@ -10,6 +10,10 @@ from accounts.serializers import PublicUserSerializer
 class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model."""
 
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+
     class Meta:
         model = Article
         fields = [

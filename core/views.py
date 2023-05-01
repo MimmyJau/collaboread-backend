@@ -30,14 +30,19 @@ class ArticleListAPIView(generics.ListAPIView):
 article_list_view = ArticleListAPIView.as_view()
 
 
-class ArticleRetrieveAPIView(generics.RetrieveAPIView):
+class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     """View one article"""
 
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsOwnerOrReadOnly]
 
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     lookup_field = "uuid"
+
+    def update(self, request, *args, **kwargs):
+        request.data["user"] = request.user
+        return super().update(request, *args, **kwargs)
 
 
 article_retrieve_view = ArticleRetrieveAPIView.as_view()
