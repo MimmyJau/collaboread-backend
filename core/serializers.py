@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from rest_framework_recursive.fields import RecursiveField
 
-from .models import Article, Annotation, Comment
+from .models import ArticleMP, Article, Annotation, Comment
 from accounts.serializers import PublicUserSerializer
 
 
@@ -26,6 +26,49 @@ class ArticleSerializer(serializers.ModelSerializer):
             "article_html",
             "article_json",
             "is_published",
+        ]
+        read_only = ["id", "uuid", "created_on", "updated_on"]
+
+
+class ArticleListSerializer(serializers.ModelSerializer):
+    """Serializer for Article Model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+
+    class Meta:
+        model = ArticleMP
+        fields = [
+            "uuid",
+            "user",
+            "title",
+            "created_on",
+            "updated_on",
+        ]
+        read_only = ["id", "uuid", "created_on", "updated_on"]
+
+
+class ArticleMPSerializer(serializers.ModelSerializer):
+    """Serializer for Article Model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+
+    children = RecursiveField(many=True, read_only=True)
+
+    class Meta:
+        model = ArticleMP
+        fields = [
+            "uuid",
+            "user",
+            "title",
+            "created_on",
+            "updated_on",
+            "article_html",
+            "level",
+            "children",
         ]
         read_only = ["id", "uuid", "created_on", "updated_on"]
 

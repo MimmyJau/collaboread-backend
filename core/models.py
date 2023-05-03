@@ -25,6 +25,39 @@ class Article(models.Model):
         return self.title + " by " + self.user.username
 
 
+class ArticleMP(MP_Node):
+    """Text: Anything that can be read by a user."""
+
+    uuid = models.UUIDField(
+        db_index=True, default=uuid.uuid4, editable=False, unique=True
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title = models.CharField(max_length=1000)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    article_html = models.TextField(
+        blank=True, help_text="HTML output from WYSIWYG editor."
+    )
+    article_json = models.JSONField(
+        blank=True, null=True, help_text="JSON output specific to ProseMirror."
+    )
+    article_text = models.TextField(
+        blank=True, help_text="Text output from WYSIWYG editor."
+    )
+
+    @property
+    def children(self):
+        return self.get_children()
+
+    @property
+    def level(self):
+        """Get depth of node. The field name 'depth' doesn't work."""
+        return self.get_depth()
+
+    def __str__(self):
+        return self.title + " by " + self.user.username
+
+
 class Annotation(models.Model):
     """Annotation: Contains highlight and optional comment."""
 
