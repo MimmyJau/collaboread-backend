@@ -80,7 +80,7 @@ class CommentSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=ArticleMP.objects.all(), read_only=False, slug_field="uuid"
     )
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
@@ -140,7 +140,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
 
     user = PublicUserSerializer(read_only=True)
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=ArticleMP.objects.all(), read_only=False, slug_field="uuid"
     )
     comments = CommentSerializer(read_only=True, many=True)
 
@@ -168,7 +168,7 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=ArticleMP.objects.all(), read_only=False, slug_field="uuid"
     )
     comments = CommentSerializer(many=True, read_only=True)
 

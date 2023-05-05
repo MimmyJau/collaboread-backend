@@ -63,7 +63,7 @@ class Annotation(models.Model):
 
     uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    article = models.ForeignKey(ArticleMP, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     highlight_start = models.PositiveIntegerField()
@@ -80,7 +80,7 @@ class Comment(MP_Node):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False
     )
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    article = models.ForeignKey(ArticleMP, on_delete=models.CASCADE)
     annotation = models.ForeignKey(
         Annotation, on_delete=models.CASCADE, related_name="comments"
     )

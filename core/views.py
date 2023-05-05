@@ -38,7 +38,7 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
-    queryset = ArticleMP.get_root_nodes()
+    queryset = ArticleMP.objects.all()
     serializer_class = ArticleMPSerializer
     lookup_field = "uuid"
 
