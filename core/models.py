@@ -1,7 +1,9 @@
+from ctypes import create_string_buffer
 import datetime
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from treebeard.mp_tree import MP_Node
@@ -53,6 +55,55 @@ class ArticleMP(MP_Node):
     def level(self):
         """Get depth of node. The field name 'depth' doesn't work."""
         return self.get_depth()
+
+    @property
+    def next(self):
+        """Get next node."""
+        try:
+            if self.get_first_child():
+                return self.get_first_child()
+            if self.get_next_sibling():
+                return self.get_next_sibling()
+            current_node = self
+            while current_node:
+                parent = current_node.get_parent()
+                if parent and parent.get_next_sibling():
+                    return parent.get_next_sibling()
+                current_node = parent
+            return None
+        except ObjectDoesNotExist:
+            return None
+
+    @property
+    def prev(self):
+        """Get previous node."""
+        try:
+            if self.get_prev_sibling():
+                current_node = self.get_prev_sibling()
+                while current_node:
+                    child = current_node.get_last_child()
+                    if child and child.get_children().count() == 0:
+                        return child
+                    if child is None:
+                        return current_node
+                    current_node = child.get_last_child()
+            if self.get_parent():
+                return self.get_parent()
+            return None
+        except ObjectDoesNotExist:
+            return None
+
+    @property
+    def slugs(self):
+        """Get list of slugs of ancestor node."""
+        parent = self.get_parent()
+        if parent:
+            # .append() returns None since it modifies in place
+            # so cannot `return list.append(...)` directly
+            parent_slugs = list(parent.slugs)
+            parent_slugs.append(str(self.uuid))
+            return parent_slugs
+        return [str(self.uuid)]
 
     def __str__(self):
         return self.title + " by " + self.user.username
