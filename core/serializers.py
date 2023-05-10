@@ -55,9 +55,9 @@ class ArticleMPSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
-    children = RecursiveField(many=True, read_only=True)
     prev = serializers.SerializerMethodField(method_name="get_prev")
     next = serializers.SerializerMethodField(method_name="get_next")
+    children = RecursiveField(many=True, read_only=True)
 
     class Meta:
         model = ArticleMP
@@ -68,12 +68,18 @@ class ArticleMPSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
             "article_html",
+            "article_json",
+            "article_text",
             "level",
             "prev",
             "next",
             "children",
         ]
         read_only = ["id", "uuid", "created_on", "updated_on", "prev", "next"]
+        extra_kwargs = {
+            "article_json": {"write_only": True},
+            "article_text": {"write_only": True},
+        }
 
     def get_next(self, obj):
         next_node = obj.next
