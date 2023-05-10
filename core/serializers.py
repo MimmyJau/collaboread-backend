@@ -73,7 +73,7 @@ class ArticleMPSerializer(serializers.ModelSerializer):
             "next",
             "children",
         ]
-        read_only = ["id", "uuid", "created_on", "updated_on", "next"]
+        read_only = ["id", "uuid", "created_on", "updated_on", "prev", "next"]
 
     def get_next(self, obj):
         next_node = obj.next
