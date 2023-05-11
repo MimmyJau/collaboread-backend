@@ -57,7 +57,6 @@ class ArticleMPSerializer(serializers.ModelSerializer):
     )
     prev = serializers.SerializerMethodField(method_name="get_prev")
     next = serializers.SerializerMethodField(method_name="get_next")
-    children = RecursiveField(many=True, read_only=True)
 
     class Meta:
         model = ArticleMP
@@ -73,7 +72,6 @@ class ArticleMPSerializer(serializers.ModelSerializer):
             "level",
             "prev",
             "next",
-            "children",
         ]
         read_only = ["id", "uuid", "created_on", "updated_on", "prev", "next"]
         extra_kwargs = {
