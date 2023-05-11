@@ -94,6 +94,22 @@ class ArticleMPSerializer(serializers.ModelSerializer):
         return None
 
 
+class TableOfContentsSerializer(serializers.ModelSerializer):
+    """Serializer for Table of Contents."""
+
+    children = RecursiveField(many=True, read_only=True)
+
+    class Meta:
+        model = ArticleMP
+        fields = [
+            "uuid",
+            "title",
+            "level",
+            "children",
+        ]
+        read_only = ["uuid", "title", "level", "children"]
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for Comment model."""
 

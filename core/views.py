@@ -15,6 +15,7 @@ from .serializers import (
     ArticleListSerializer,
     ArticleMPSerializer,
     CommentSerializer,
+    TableOfContentsSerializer,
 )
 
 
@@ -48,6 +49,17 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
 
 
 article_retrieve_view = ArticleRetrieveAPIView.as_view()
+
+
+class TableOfContentsRetrieveView(generics.RetrieveAPIView):
+    """Get table of contents of an article"""
+
+    queryset = ArticleMP.objects.all()
+    serializer_class = TableOfContentsSerializer
+    lookup_field = "uuid"
+
+
+table_of_contents_retrieve_view = TableOfContentsRetrieveView.as_view()
 
 
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
