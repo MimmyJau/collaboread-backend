@@ -6,13 +6,16 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
-from .models import Annotation, Article, Comment
+from .models import Annotation, Article, ArticleMP, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationReadSerializer,
     AnnotationWriteSerializer,
     ArticleSerializer,
+    ArticleListSerializer,
+    ArticleMPSerializer,
     CommentSerializer,
+    TableOfContentsSerializer,
 )
 
 
@@ -23,24 +26,40 @@ def index(request):
 class ArticleListAPIView(generics.ListAPIView):
     """View all articles"""
 
-    queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
+    queryset = ArticleMP.get_root_nodes()
+    serializer_class = ArticleListSerializer
 
 
 article_list_view = ArticleListAPIView.as_view()
 
 
-class ArticleRetrieveAPIView(generics.RetrieveAPIView):
+class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     """View one article"""
 
-    permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsOwnerOrReadOnly]
 
-    queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
+    queryset = ArticleMP.objects.all()
+    serializer_class = ArticleMPSerializer
     lookup_field = "uuid"
+
+    def update(self, request, *args, **kwargs):
+        request.data["user"] = request.user
+        return super().update(request, *args, **kwargs)
 
 
 article_retrieve_view = ArticleRetrieveAPIView.as_view()
+
+
+class TableOfContentsRetrieveView(generics.RetrieveAPIView):
+    """Get table of contents of an article"""
+
+    queryset = ArticleMP.objects.all()
+    serializer_class = TableOfContentsSerializer
+    lookup_field = "uuid"
+
+
+table_of_contents_retrieve_view = TableOfContentsRetrieveView.as_view()
 
 
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):

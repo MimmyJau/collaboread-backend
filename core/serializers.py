@@ -3,12 +3,16 @@ from rest_framework import serializers
 
 from rest_framework_recursive.fields import RecursiveField
 
-from .models import Article, Annotation, Comment
+from .models import ArticleMP, Article, Annotation, Comment
 from accounts.serializers import PublicUserSerializer
 
 
 class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
 
     class Meta:
         model = Article
@@ -26,6 +30,84 @@ class ArticleSerializer(serializers.ModelSerializer):
         read_only = ["id", "uuid", "created_on", "updated_on"]
 
 
+class ArticleListSerializer(serializers.ModelSerializer):
+    """Serializer for Article Model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+
+    class Meta:
+        model = ArticleMP
+        fields = [
+            "uuid",
+            "user",
+            "title",
+            "created_on",
+            "updated_on",
+        ]
+        read_only = ["id", "uuid", "created_on", "updated_on"]
+
+
+class ArticleMPSerializer(serializers.ModelSerializer):
+    """Serializer for Article Model."""
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+    prev = serializers.SerializerMethodField(method_name="get_prev")
+    next = serializers.SerializerMethodField(method_name="get_next")
+
+    class Meta:
+        model = ArticleMP
+        fields = [
+            "uuid",
+            "user",
+            "title",
+            "created_on",
+            "updated_on",
+            "article_html",
+            "article_json",
+            "article_text",
+            "level",
+            "prev",
+            "next",
+        ]
+        read_only = ["id", "uuid", "created_on", "updated_on", "prev", "next"]
+        extra_kwargs = {
+            "article_json": {"write_only": True},
+            "article_text": {"write_only": True},
+        }
+
+    def get_next(self, obj):
+        next_node = obj.next
+        if next_node:
+            return next_node.slugs
+        return None
+
+    def get_prev(self, obj):
+        prev_node = obj.prev
+        if prev_node:
+            return prev_node.slugs
+        return None
+
+
+class TableOfContentsSerializer(serializers.ModelSerializer):
+    """Serializer for Table of Contents."""
+
+    children = RecursiveField(many=True, read_only=True)
+
+    class Meta:
+        model = ArticleMP
+        fields = [
+            "uuid",
+            "title",
+            "level",
+            "children",
+        ]
+        read_only = ["uuid", "title", "level", "children"]
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for Comment model."""
 
@@ -33,7 +115,7 @@ class CommentSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=ArticleMP.objects.all(), read_only=False, slug_field="uuid"
     )
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
@@ -93,7 +175,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
 
     user = PublicUserSerializer(read_only=True)
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=ArticleMP.objects.all(), read_only=False, slug_field="uuid"
     )
     comments = CommentSerializer(read_only=True, many=True)
 
@@ -121,7 +203,7 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=ArticleMP.objects.all(), read_only=False, slug_field="uuid"
     )
     comments = CommentSerializer(many=True, read_only=True)
 

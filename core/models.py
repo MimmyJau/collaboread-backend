@@ -1,7 +1,9 @@
+from ctypes import create_string_buffer
 import datetime
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from treebeard.mp_tree import MP_Node
@@ -25,12 +27,94 @@ class Article(models.Model):
         return self.title + " by " + self.user.username
 
 
+class ArticleMP(MP_Node):
+    """Text: Anything that can be read by a user."""
+
+    uuid = models.UUIDField(
+        db_index=True, default=uuid.uuid4, editable=False, unique=True
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title = models.CharField(max_length=1000)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    article_html = models.TextField(
+        blank=True, help_text="HTML output from WYSIWYG editor."
+    )
+    article_json = models.JSONField(
+        blank=True, null=True, help_text="JSON output specific to ProseMirror."
+    )
+    article_text = models.TextField(
+        blank=True, help_text="Text output from WYSIWYG editor."
+    )
+
+    @property
+    def children(self):
+        return self.get_children()
+
+    @property
+    def level(self):
+        """Get depth of node. The field name 'depth' doesn't work."""
+        return self.get_depth()
+
+    @property
+    def next(self):
+        """Get next node."""
+        try:
+            if self.get_first_child():
+                return self.get_first_child()
+            if self.get_next_sibling():
+                return self.get_next_sibling()
+            current_node = self
+            while current_node:
+                parent = current_node.get_parent()
+                if parent and parent.get_next_sibling():
+                    return parent.get_next_sibling()
+                current_node = parent
+            return None
+        except ObjectDoesNotExist:
+            return None
+
+    @property
+    def prev(self):
+        """Get previous node."""
+        try:
+            if self.get_prev_sibling():
+                current_node = self.get_prev_sibling()
+                while current_node:
+                    child = current_node.get_last_child()
+                    if child and child.get_children().count() == 0:
+                        return child
+                    if child is None:
+                        return current_node
+                    current_node = child.get_last_child()
+            if self.get_parent():
+                return self.get_parent()
+            return None
+        except ObjectDoesNotExist:
+            return None
+
+    @property
+    def slugs(self):
+        """Get list of slugs of ancestor node."""
+        parent = self.get_parent()
+        if parent:
+            # .append() returns None since it modifies in place
+            # so cannot `return list.append(...)` directly
+            parent_slugs = list(parent.slugs)
+            parent_slugs.append(str(self.uuid))
+            return parent_slugs
+        return [str(self.uuid)]
+
+    def __str__(self):
+        return self.title + " by " + self.user.username
+
+
 class Annotation(models.Model):
     """Annotation: Contains highlight and optional comment."""
 
     uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    article = models.ForeignKey(ArticleMP, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     highlight_start = models.PositiveIntegerField()
@@ -47,7 +131,7 @@ class Comment(MP_Node):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False
     )
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    article = models.ForeignKey(ArticleMP, on_delete=models.CASCADE)
     annotation = models.ForeignKey(
         Annotation, on_delete=models.CASCADE, related_name="comments"
     )

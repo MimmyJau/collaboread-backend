@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Annotation, Comment
+from .models import Article, ArticleMP, Annotation, Comment
 
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -21,6 +21,36 @@ class ArticleAdmin(admin.ModelAdmin):
         "is_published",
     ]
     readonly_fields = ["id", "uuid", "created_on"]
+
+
+class ArticleMPAdmin(TreeAdmin):
+    form = movenodeform_factory(ArticleMP)
+    list_display = (
+        "title",
+        "uuid",
+    )
+    readonly_fields = ["uuid"]
+    fieldsets = (
+        (
+            "Article Info",
+            {
+                "fields": (
+                    "uuid",
+                    "user",
+                    "title",
+                    "article_html",
+                    "article_json",
+                    "article_text",
+                )
+            },
+        ),
+        (
+            "Move Node",
+            {
+                "fields": ("_position", "_ref_node_id"),
+            },
+        ),
+    )
 
 
 class AnnotationAdmin(admin.ModelAdmin):
@@ -52,5 +82,6 @@ class CommentAdmin(TreeAdmin):
 
 
 admin.site.register(Article, ArticleAdmin)
+admin.site.register(ArticleMP, ArticleMPAdmin)
 admin.site.register(Annotation, AnnotationAdmin)
 admin.site.register(Comment, CommentAdmin)
