@@ -121,6 +121,7 @@ class Annotation(models.Model):
     highlight_start = models.PositiveIntegerField()
     highlight_end = models.PositiveIntegerField()
     highlight_backward = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=False)
 
 
 class Comment(MP_Node):

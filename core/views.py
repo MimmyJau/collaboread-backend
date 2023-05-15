@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.http import HttpResponse
 
 from rest_framework import generics
@@ -71,6 +72,9 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         qs = Annotation.objects.filter(
             article__uuid=self.kwargs["article_uuid"],
         )  # SELECT Annotations for a specific Article
+        qs = qs.filter(
+            Q(is_public=True) | Q(user=self.request.user)
+        )  # SELECT public annotations or user's annotations
         qs = qs.select_related(
             "article"
         )  # SELECT Article info as well to remove duplicate query (for SlugRelatedField)

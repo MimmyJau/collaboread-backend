@@ -193,6 +193,7 @@ class AnnotationReadSerializer(serializers.ModelSerializer):
             "highlight_end",
             "highlight_backward",
             "comments",
+            "is_public",
         ]
         read_only = ["id", "user", "created_on", "updated_on"]
 
@@ -226,4 +227,5 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
             "highlight_end",
             "highlight_backward",
             "comments",
+            "is_public",
         ]

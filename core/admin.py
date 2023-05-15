@@ -63,7 +63,7 @@ class AnnotationAdmin(admin.ModelAdmin):
         "highlight_end",
         "created_on",
     )
-    list_filter = ("article", "user", "created_on")
+    list_filter = ("article", "user", "is_public", "created_on")
 
     fields = [
         "id",
@@ -74,6 +74,7 @@ class AnnotationAdmin(admin.ModelAdmin):
         "highlight_start",
         "highlight_end",
         "highlight_backward",
+        "is_public",
     ]
     readonly_fields = ["id", "uuid", "created_on"]
 
