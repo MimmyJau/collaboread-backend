@@ -43,10 +43,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "uuid",
             "user",
             "title",
+            "author",
             "created_on",
             "updated_on",
         ]
-        read_only = ["id", "uuid", "created_on", "updated_on"]
+        read_only = ["uuid", "created_on", "updated_on"]
 
 
 class ArticleMPSerializer(serializers.ModelSerializer):

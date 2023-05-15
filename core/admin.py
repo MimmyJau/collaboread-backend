@@ -38,6 +38,7 @@ class ArticleMPAdmin(TreeAdmin):
                     "uuid",
                     "user",
                     "title",
+                    "author",
                     "article_html",
                     "article_json",
                     "article_text",
