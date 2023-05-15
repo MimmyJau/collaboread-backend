@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.http import HttpResponse
 
 from rest_framework import generics
@@ -6,14 +7,13 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
-from .models import Annotation, Article, ArticleMP, Comment
+from .models import Annotation, ArticleMP, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationReadSerializer,
     AnnotationWriteSerializer,
     ArticleSerializer,
     ArticleListSerializer,
-    ArticleMPSerializer,
     CommentSerializer,
     TableOfContentsSerializer,
 )
@@ -40,7 +40,7 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     queryset = ArticleMP.objects.all()
-    serializer_class = ArticleMPSerializer
+    serializer_class = ArticleSerializer
     lookup_field = "uuid"
 
     def update(self, request, *args, **kwargs):
@@ -71,6 +71,9 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         qs = Annotation.objects.filter(
             article__uuid=self.kwargs["article_uuid"],
         )  # SELECT Annotations for a specific Article
+        qs = qs.filter(
+            Q(is_public=True) | Q(user=self.request.user)
+        )  # SELECT public annotations or user's annotations
         qs = qs.select_related(
             "article"
         )  # SELECT Article info as well to remove duplicate query (for SlugRelatedField)

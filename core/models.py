@@ -9,24 +9,6 @@ from django.db import models
 from treebeard.mp_tree import MP_Node
 
 
-class Article(models.Model):
-    """Text: Anything that can be read by a user."""
-
-    uuid = models.UUIDField(
-        db_index=True, default=uuid.uuid4, editable=False, unique=True
-    )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    title = models.CharField(max_length=1000)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
-    article_html = models.TextField(help_text="HTML / rich-text from rich-text editor.")
-    article_json = models.JSONField(help_text="JSON output from tiptap / ProseMirror.")
-    is_published = models.BooleanField(help_text="If true, others can read it.")
-
-    def __str__(self):
-        return self.title + " by " + self.user.username
-
-
 class ArticleMP(MP_Node):
     """Text: Anything that can be read by a user."""
 
@@ -35,6 +17,7 @@ class ArticleMP(MP_Node):
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
+    author = models.CharField(max_length=100, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     article_html = models.TextField(
@@ -120,6 +103,7 @@ class Annotation(models.Model):
     highlight_start = models.PositiveIntegerField()
     highlight_end = models.PositiveIntegerField()
     highlight_backward = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=False)
 
 
 class Comment(MP_Node):
