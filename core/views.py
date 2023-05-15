@@ -7,14 +7,13 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
-from .models import Annotation, Article, ArticleMP, Comment
+from .models import Annotation, ArticleMP, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationReadSerializer,
     AnnotationWriteSerializer,
     ArticleSerializer,
     ArticleListSerializer,
-    ArticleMPSerializer,
     CommentSerializer,
     TableOfContentsSerializer,
 )
@@ -41,7 +40,7 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     queryset = ArticleMP.objects.all()
-    serializer_class = ArticleMPSerializer
+    serializer_class = ArticleSerializer
     lookup_field = "uuid"
 
     def update(self, request, *args, **kwargs):

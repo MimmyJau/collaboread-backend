@@ -1,26 +1,11 @@
 from django.contrib import admin
-from .models import Article, ArticleMP, Annotation, Comment
+from .models import ArticleMP, Annotation, Comment
 
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 
 
 # Register your models here.
-class ArticleAdmin(admin.ModelAdmin):
-    list_display = ("title", "uuid", "user", "created_on")
-    list_filter = ("user", "created_on")
-
-    fields = [
-        "id",
-        "uuid",
-        "created_on",
-        "user",
-        "title",
-        "article_html",
-        "article_json",
-        "is_published",
-    ]
-    readonly_fields = ["id", "uuid", "created_on"]
 
 
 class ArticleMPAdmin(TreeAdmin):
@@ -83,7 +68,6 @@ class CommentAdmin(TreeAdmin):
     form = movenodeform_factory(Comment)
 
 
-admin.site.register(Article, ArticleAdmin)
 admin.site.register(ArticleMP, ArticleMPAdmin)
 admin.site.register(Annotation, AnnotationAdmin)
 admin.site.register(Comment, CommentAdmin)
