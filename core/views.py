@@ -3,9 +3,8 @@ from django.db.models import Q
 from django.http import HttpResponse
 
 from rest_framework import generics
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import (
-    AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
@@ -40,7 +39,7 @@ article_list_view = ArticleListAPIView.as_view()
 class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     """View one article"""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
     queryset = Article.objects.all()
@@ -69,8 +68,8 @@ table_of_contents_retrieve_view = TableOfContentsRetrieveView.as_view()
 class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a article"""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         # SELECT Annotations for a specific Article
@@ -104,7 +103,7 @@ annotation_list_create_view = AnnotationListCreateAPIView.as_view()
 class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """Retrive, Update, or Delete an annotation"""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
     queryset = Annotation.objects.all()
@@ -132,10 +131,10 @@ class UserListAPIView(generics.ListAPIView):
 user_list_view = UserListAPIView.as_view()
 
 
-class CommentListCreateAPIView(generics.ListCreateAPIView):
+class CommentCreateAPIView(generics.CreateAPIView):
     """List your comments and create a comment."""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = CommentSerializer
 
@@ -148,13 +147,13 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
         return super().create(request, *args, **kwargs)
 
 
-comment_list_create_view = CommentListCreateAPIView.as_view()
+comment_create_view = CommentCreateAPIView.as_view()
 
 
 class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """Retrive, Update, or Delete a comment."""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
     queryset = Comment.objects.all()
