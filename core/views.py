@@ -7,7 +7,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import UserSerializer
-from .models import Annotation, ArticleMP, Comment
+from .models import Annotation, Article, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationReadSerializer,
@@ -26,7 +26,7 @@ def index(request):
 class ArticleListAPIView(generics.ListAPIView):
     """View all articles"""
 
-    queryset = ArticleMP.get_root_nodes()
+    queryset = Article.get_root_nodes()
     serializer_class = ArticleListSerializer
 
 
@@ -39,7 +39,7 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
-    queryset = ArticleMP.objects.all()
+    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     lookup_field = "uuid"
 
@@ -54,7 +54,7 @@ article_retrieve_view = ArticleRetrieveAPIView.as_view()
 class TableOfContentsRetrieveView(generics.RetrieveAPIView):
     """Get table of contents of an article"""
 
-    queryset = ArticleMP.objects.all()
+    queryset = Article.objects.all()
     serializer_class = TableOfContentsSerializer
     lookup_field = "uuid"
 
