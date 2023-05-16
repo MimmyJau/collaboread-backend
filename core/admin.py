@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ArticleMP, Annotation, Comment
+from .models import Article, Annotation, Comment
 
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -8,8 +8,8 @@ from treebeard.forms import movenodeform_factory
 # Register your models here.
 
 
-class ArticleMPAdmin(TreeAdmin):
-    form = movenodeform_factory(ArticleMP)
+class ArticleAdmin(TreeAdmin):
+    form = movenodeform_factory(Article)
     list_display = (
         "title",
         "uuid",
@@ -68,6 +68,6 @@ class CommentAdmin(TreeAdmin):
     form = movenodeform_factory(Comment)
 
 
-admin.site.register(ArticleMP, ArticleMPAdmin)
+admin.site.register(Article, ArticleAdmin)
 admin.site.register(Annotation, AnnotationAdmin)
 admin.site.register(Comment, CommentAdmin)
