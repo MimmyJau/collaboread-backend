@@ -8,7 +8,7 @@ from accounts.serializers import PublicUserSerializer
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
-    """Serializer for Article Model."""
+    """Serializer for List of Articles. Don't want to send entire book."""
 
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
@@ -28,7 +28,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
-    """Serializer for Article Model."""
+    """Serializer for individual Article objects."""
 
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
@@ -71,7 +71,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class TableOfContentsSerializer(serializers.ModelSerializer):
-    """Serializer for Table of Contents."""
+    """Serializer for Table of Contents. Includes children but the bare-minimum data."""
 
     children = RecursiveField(many=True, read_only=True)
 

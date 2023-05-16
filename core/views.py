@@ -74,7 +74,7 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         # SELECT Annotations for a specific Article
         qs = Annotation.objects.filter(
-            article__uuid=self.kwargs["article_uuid"],
+            article__uuid=self.kwargs["uuid"],
         )
         # SELECT public annotations or user's annotations
         # Need conditional depending on whether user is logged in or not
