@@ -4,7 +4,11 @@ from django.http import HttpResponse
 
 from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 
 from accounts.serializers import UserSerializer
 from .models import Annotation, Article, Comment
@@ -66,17 +70,21 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     """View annotations with a article"""
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        # SELECT Annotations for a specific Article
         qs = Annotation.objects.filter(
             article__uuid=self.kwargs["article_uuid"],
-        )  # SELECT Annotations for a specific Article
-        qs = qs.filter(
-            Q(is_public=True) | Q(user=self.request.user)
-        )  # SELECT public annotations or user's annotations
-        qs = qs.select_related(
-            "article"
-        )  # SELECT Article info as well to remove duplicate query (for SlugRelatedField)
+        )
+        # SELECT public annotations or user's annotations
+        # Need conditional depending on whether user is logged in or not
+        if self.request.user.is_authenticated:
+            qs = qs.filter(Q(is_public=True) | Q(user=self.request.user))
+        else:
+            qs = qs.filter(is_public=True)
+        # SELECT Article info as well to remove duplicate query (for SlugRelatedField)
+        qs = qs.select_related("article")
         return qs
 
     def get_serializer_class(self):
