@@ -13,8 +13,7 @@ from accounts.serializers import UserSerializer
 from .models import Annotation, Article, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
-    AnnotationReadSerializer,
-    AnnotationWriteSerializer,
+    AnnotationSerializer,
     ArticleSerializer,
     ArticleListSerializer,
     CommentSerializer,
@@ -70,6 +69,7 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
+    serializer_class = AnnotationSerializer
 
     def get_queryset(self):
         # SELECT Annotations for a specific Article
@@ -85,11 +85,6 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         # SELECT Article info as well to remove duplicate query (for SlugRelatedField)
         qs = qs.select_related("article")
         return qs
-
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return AnnotationReadSerializer
-        return AnnotationWriteSerializer
 
     def create(self, request, *args, **kwargs):
         """Temp conditional until we add auth"""
@@ -107,7 +102,7 @@ class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
     permission_classes = [IsOwnerOrReadOnly]
 
     queryset = Annotation.objects.all()
-    serializer_class = AnnotationWriteSerializer
+    serializer_class = AnnotationSerializer
     lookup_field = "uuid"
 
     def update(self, request, *args, **kwargs):

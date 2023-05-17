@@ -51,7 +51,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "prev",
             "next",
         ]
-        read_only = ["id", "uuid", "created_on", "updated_on", "prev", "next"]
+        read_only = ["uuid", "created_on", "updated_on", "prev", "next"]
         extra_kwargs = {
             "article_json": {"write_only": True},
             "article_text": {"write_only": True},
@@ -148,35 +148,8 @@ class CommentSerializer(serializers.ModelSerializer):
         return rep
 
 
-class AnnotationReadSerializer(serializers.ModelSerializer):
-    """Serializer for Reading Annotation model."""
-
-    user = PublicUserSerializer(read_only=True)
-    article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
-    )
-    comments = CommentSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Annotation
-        fields = [
-            "id",
-            "uuid",
-            "user",
-            "article",
-            "created_on",
-            "updated_on",
-            "highlight_start",
-            "highlight_end",
-            "highlight_backward",
-            "comments",
-            "is_public",
-        ]
-        read_only = ["id", "user", "created_on", "updated_on"]
-
-
-class AnnotationWriteSerializer(serializers.ModelSerializer):
-    """Serializer for Writing Annotation model."""
+class AnnotationSerializer(serializers.ModelSerializer):
+    """Serializer for Annotation model."""
 
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
@@ -206,3 +179,4 @@ class AnnotationWriteSerializer(serializers.ModelSerializer):
             "comments",
             "is_public",
         ]
+        read_only = ["uuid", "created_on", "updated_on"]
