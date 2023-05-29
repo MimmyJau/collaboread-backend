@@ -173,6 +173,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "updated_on",
             "highlight_start",
             "highlight_end",
+            "highlight_serialization",
             "highlight_backward",
             "comments",
             "is_public",
