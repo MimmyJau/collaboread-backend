@@ -103,7 +103,6 @@ class Annotation(models.Model):
     highlight_start = models.PositiveIntegerField()
     highlight_end = models.PositiveIntegerField()
     highlight_backward = models.BooleanField(default=False)
-    highlight_serialization = models.TextField(blank=True)
     is_public = models.BooleanField(default=False)
 
 
