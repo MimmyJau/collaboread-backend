@@ -8,6 +8,7 @@ from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
+import uuid
 
 from accounts.serializers import UserSerializer
 from .models import Annotation, Article, Comment
@@ -87,8 +88,9 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
         return qs
 
     def create(self, request, *args, **kwargs):
-        """Temp conditional until we add auth"""
         request.data["user"] = request.user
+        if "uuid" not in request.data:
+            request.data["uuid"] = uuid.uuid4()
         return super().create(request, *args, **kwargs)
 
 

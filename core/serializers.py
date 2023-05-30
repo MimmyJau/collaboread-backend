@@ -4,7 +4,6 @@ from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
 from .models import Article, Annotation, Comment
-from accounts.serializers import PublicUserSerializer
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
