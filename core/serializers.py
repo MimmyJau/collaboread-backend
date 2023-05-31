@@ -3,7 +3,27 @@ from rest_framework import serializers
 
 from rest_framework_recursive.fields import RecursiveField
 
+from bleach import clean
+
 from .models import Article, Annotation, Comment
+
+allowed_tags = [
+    "b",
+    "code",
+    "em",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "li",
+    "mark",
+    "ol",
+    "p",
+    "strong",
+    "ul",
+]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -32,6 +52,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
+    article_html = serializers.SerializerMethodField(method_name="get_article_html")
     prev = serializers.SerializerMethodField(method_name="get_prev")
     next = serializers.SerializerMethodField(method_name="get_next")
 
@@ -55,6 +76,11 @@ class ArticleSerializer(serializers.ModelSerializer):
             "article_json": {"write_only": True},
             "article_text": {"write_only": True},
         }
+
+    def get_article_html(self, obj):
+        """Clean article_text and return as html."""
+        # return clean(obj.article_html, tags=allowed_tags, strip=True)
+        return obj.article_html
 
     def get_next(self, obj):
         next_node = obj.next
@@ -97,6 +123,7 @@ class CommentSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
+    comment_html = serializers.SerializerMethodField(method_name="get_comment_html")
 
     """
     Since parent field is read-only in MP_Tree, we have to use a
@@ -144,6 +171,11 @@ class CommentSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         rep["parent_uuid"] = instance.parent.uuid if instance.parent else None
         return rep
+
+    def get_comment_html(self, obj):
+        """Clean comment_html and return as html."""
+        # return clean(obj.comment_html, tags=allowed_tags, strip=True)
+        return obj.article_html
 
 
 class AnnotationSerializer(serializers.ModelSerializer):
