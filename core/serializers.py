@@ -175,7 +175,7 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_comment_html(self, obj):
         """Clean comment_html and return as html."""
         # return clean(obj.comment_html, tags=allowed_tags, strip=True)
-        return obj.article_html
+        return obj.comment_html
 
 
 class AnnotationSerializer(serializers.ModelSerializer):
