@@ -8,6 +8,7 @@ from bleach import clean
 from .models import Article, Annotation, Comment
 
 allowed_tags = [
+    "a",
     "b",
     "code",
     "em",
@@ -27,7 +28,9 @@ allowed_tags = [
 ]
 
 allowed_attributes = [
+    "href",
     "src",
+    "target",
 ]
 
 
