@@ -17,12 +17,17 @@ allowed_tags = [
     "h4",
     "h5",
     "h6",
+    "img",
     "li",
     "mark",
     "ol",
     "p",
     "strong",
     "ul",
+]
+
+allowed_attributes = [
+    "src",
 ]
 
 
@@ -52,7 +57,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
-    article_html = serializers.SerializerMethodField(method_name="get_article_html")
+    # article_html = serializers.SerializerMethodField(method_name="get_article_html")
     prev = serializers.SerializerMethodField(method_name="get_prev")
     next = serializers.SerializerMethodField(method_name="get_next")
 
@@ -77,10 +82,15 @@ class ArticleSerializer(serializers.ModelSerializer):
             "article_text": {"write_only": True},
         }
 
-    def get_article_html(self, obj):
-        """Clean article_text and return as html."""
-        # return clean(obj.article_html, tags=allowed_tags, strip=True)
-        return obj.article_html
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep["article_html"] = clean(
+            instance.article_html,
+            attributes=allowed_attributes,
+            tags=allowed_tags,
+            strip=True,
+        )
+        return rep
 
     def get_next(self, obj):
         next_node = obj.next
@@ -170,7 +180,10 @@ class CommentSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         rep["parent_uuid"] = instance.parent.uuid if instance.parent else None
         rep["comment_html"] = clean(
-            instance.comment_html, tags=allowed_tags, strip=True
+            instance.comment_html,
+            attributes=allowed_attributes,
+            tags=allowed_tags,
+            strip=True,
         )
         return rep
 
