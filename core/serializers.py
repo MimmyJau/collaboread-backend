@@ -10,6 +10,8 @@ from .models import Article, Annotation, Comment
 allowed_tags = [
     "a",
     "b",
+    "blockquote",
+    "br",
     "code",
     "em",
     "h1",
@@ -24,10 +26,16 @@ allowed_tags = [
     "ol",
     "p",
     "strong",
+    "table",
+    "tbody",
+    "td",
+    "th",
+    "tr",
     "ul",
 ]
 
 allowed_attributes = [
+    "class",
     "href",
     "src",
     "target",
