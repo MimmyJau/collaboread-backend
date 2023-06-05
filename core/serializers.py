@@ -3,7 +3,27 @@ from rest_framework import serializers
 
 from rest_framework_recursive.fields import RecursiveField
 
+from bleach import clean
+
 from .models import Article, Annotation, Comment
+
+allowed_tags = [
+    "b",
+    "code",
+    "em",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "li",
+    "mark",
+    "ol",
+    "p",
+    "strong",
+    "ul",
+]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
@@ -32,6 +52,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
+    article_html = serializers.SerializerMethodField(method_name="get_article_html")
     prev = serializers.SerializerMethodField(method_name="get_prev")
     next = serializers.SerializerMethodField(method_name="get_next")
 
@@ -55,6 +76,11 @@ class ArticleSerializer(serializers.ModelSerializer):
             "article_json": {"write_only": True},
             "article_text": {"write_only": True},
         }
+
+    def get_article_html(self, obj):
+        """Clean article_text and return as html."""
+        # return clean(obj.article_html, tags=allowed_tags, strip=True)
+        return obj.article_html
 
     def get_next(self, obj):
         next_node = obj.next
@@ -143,6 +169,9 @@ class CommentSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep["parent_uuid"] = instance.parent.uuid if instance.parent else None
+        rep["comment_html"] = clean(
+            instance.comment_html, tags=allowed_tags, strip=True
+        )
         return rep
 
 

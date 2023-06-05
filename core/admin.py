@@ -66,6 +66,7 @@ class AnnotationAdmin(admin.ModelAdmin):
 
 class CommentAdmin(TreeAdmin):
     form = movenodeform_factory(Comment)
+    list_display = ("comment_text", "uuid", "user")
 
 
 admin.site.register(Article, ArticleAdmin)
