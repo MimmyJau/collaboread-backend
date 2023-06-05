@@ -123,7 +123,6 @@ class CommentSerializer(serializers.ModelSerializer):
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
     )
-    comment_html = serializers.SerializerMethodField(method_name="get_comment_html")
 
     """
     Since parent field is read-only in MP_Tree, we have to use a
@@ -170,12 +169,10 @@ class CommentSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep["parent_uuid"] = instance.parent.uuid if instance.parent else None
+        rep["comment_html"] = clean(
+            instance.comment_html, tags=allowed_tags, strip=True
+        )
         return rep
-
-    def get_comment_html(self, obj):
-        """Clean comment_html and return as html."""
-        # return clean(obj.comment_html, tags=allowed_tags, strip=True)
-        return obj.comment_html
 
 
 class AnnotationSerializer(serializers.ModelSerializer):
