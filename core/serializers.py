@@ -26,6 +26,7 @@ allowed_tags = [
     "ol",
     "p",
     "strong",
+    "sup",
     "table",
     "tbody",
     "td",
