@@ -25,6 +25,7 @@ allowed_tags = [
     "mark",
     "ol",
     "p",
+    "pre",
     "strong",
     "sup",
     "table",
