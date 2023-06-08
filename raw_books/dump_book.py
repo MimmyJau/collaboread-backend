@@ -5,6 +5,7 @@ import sys
 import django
 import json
 
+# Need this first line since we're in a subdirectory
 sys.path.append("../")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "collaboread.settings")
 
