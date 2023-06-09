@@ -21,6 +21,8 @@ class ArticleAdmin(TreeAdmin):
             {
                 "fields": (
                     "uuid",
+                    "slug_section",
+                    "slug_full",
                     "user",
                     "title",
                     "author",

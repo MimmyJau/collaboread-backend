@@ -18,6 +18,8 @@ class Article(MP_Node):
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000)
+    slug_section = models.TextField(max_length=50)
+    slug_full = models.TextField(max_length=1000, unique=True, db_index=True)
     author = models.CharField(max_length=100, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
