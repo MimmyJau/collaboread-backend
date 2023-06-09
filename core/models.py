@@ -1,5 +1,6 @@
 from ctypes import create_string_buffer
 import datetime
+from slugify import slugify
 import uuid
 
 from django.conf import settings
@@ -90,6 +91,22 @@ class Article(MP_Node):
             parent_slugs.append(str(self.uuid))
             return parent_slugs
         return [str(self.uuid)]
+
+    def save(self, *args, **kwargs):
+        """Override save method to generate slugs."""
+        # Generate section slug
+        if not self.slug_section:
+            potential_slug = slugify(self.title, max_length=50)
+            # Check that slug is unique among siblings
+            for sibling in self.get_siblings():
+                if sibling.slug_section == potential_slug:
+                    potential_slug += "-"
+            self.slug_section = potential_slug
+        # Generating full slug
+        if self.get_parent().slug_full + "/" + self.slug_section != self.slug_full:
+            self.slug_full = self.get_parent().slug_full + "/" + self.slug_section
+            # update all the descendent slugs
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title + " by " + self.user.username
