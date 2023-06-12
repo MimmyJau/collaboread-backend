@@ -29,7 +29,7 @@ def index(request):
 class ArticleListAPIView(generics.ListAPIView):
     """View all articles"""
 
-    queryset = Article.get_root_nodes()
+    queryset = Article.get_root_nodes().filter(hidden=False)
     serializer_class = ArticleListSerializer
 
 
