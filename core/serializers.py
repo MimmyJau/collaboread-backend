@@ -144,7 +144,7 @@ class CommentSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
     )
     annotation = serializers.SlugRelatedField(
         queryset=Annotation.objects.all(), read_only=False, slug_field="uuid"
@@ -211,7 +211,7 @@ class AnnotationSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="uuid"
+        queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
     )
     comments = CommentSerializer(many=True, read_only=True)
 
