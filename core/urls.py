@@ -5,8 +5,8 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("articles/", views.article_list_view, name="articles"),
-    path("toc/<uuid>/", views.table_of_contents_retrieve_view, name="toc"),
-    path("articles/<uuid>/", views.article_retrieve_view, name="article"),
+    path("toc/<slug_full>/", views.table_of_contents_retrieve_view, name="toc"),
+    path("articles/<path:slug_full>/", views.article_retrieve_view, name="article"),
     path(
         "articles/<uuid>/annotations/",
         views.annotation_list_create_view,

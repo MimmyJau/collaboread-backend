@@ -55,13 +55,14 @@ class ArticleListSerializer(serializers.ModelSerializer):
         model = Article
         fields = [
             "uuid",
+            "slug_full",
             "user",
             "title",
             "author",
             "created_on",
             "updated_on",
         ]
-        read_only = ["uuid", "created_on", "updated_on"]
+        read_only = ["uuid", "slug_full", "created_on", "updated_on"]
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -78,6 +79,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
         fields = [
             "uuid",
+            "slug_full",
             "user",
             "title",
             "created_on",
@@ -89,7 +91,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             "prev",
             "next",
         ]
-        read_only = ["uuid", "created_on", "updated_on", "prev", "next"]
+        read_only = ["uuid", "slug_full", "created_on", "updated_on", "prev", "next"]
         extra_kwargs = {
             "article_json": {"write_only": True},
             "article_text": {"write_only": True},
@@ -108,13 +110,13 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_next(self, obj):
         next_node = obj.next
         if next_node:
-            return next_node.slugs
+            return next_node.slug_full
         return None
 
     def get_prev(self, obj):
         prev_node = obj.prev
         if prev_node:
-            return prev_node.slugs
+            return prev_node.slug_full
         return None
 
 
@@ -127,11 +129,12 @@ class TableOfContentsSerializer(serializers.ModelSerializer):
         model = Article
         fields = [
             "uuid",
+            "slug_full",
             "title",
             "level",
             "children",
         ]
-        read_only = ["uuid", "title", "level", "children"]
+        read_only = ["uuid", "slug_full", "title", "level", "children"]
 
 
 class CommentSerializer(serializers.ModelSerializer):
