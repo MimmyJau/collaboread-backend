@@ -105,16 +105,18 @@ class Article(MP_Node):
                 continue
             if sibling.slug_section == self.slug_section:
                 self.slug_section += "-"
-        # Generate full slug if root
+        # Now generate full slug, but first save current slug
+        # so we can compare later and update children if necessary
+        prev_slug_full = self.slug_full
         if self.is_root():
             self.slug_full = self.slug_section
-        # If not root, only update slug_full if required
-        elif self.get_parent().slug_full + "/" + self.slug_section != self.slug_full:
+        else:
             self.slug_full = self.get_parent().slug_full + "/" + self.slug_section
-        # Save and update all child slugs
         super().save(*args, **kwargs)
-        for child in self.get_children():
-            child.save()
+        # If new slug is not the same as old slug, update all children
+        if self.slug_full != prev_slug_full:
+            for child in self.get_children():
+                child.save()
 
     def __str__(self):
         return self.title + " by " + self.user.username
