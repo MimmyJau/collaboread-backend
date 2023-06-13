@@ -36,7 +36,7 @@ class ArticleListAPIView(generics.ListAPIView):
 article_list_view = ArticleListAPIView.as_view()
 
 
-class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
+class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     """View one article"""
 
     authentication_classes = [TokenAuthentication]
@@ -51,7 +51,7 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
         return super().update(request, *args, **kwargs)
 
 
-article_retrieve_view = ArticleRetrieveAPIView.as_view()
+article_retrieve_update_view = ArticleRetrieveUpdateAPIView.as_view()
 
 
 class TableOfContentsRetrieveView(generics.RetrieveAPIView):

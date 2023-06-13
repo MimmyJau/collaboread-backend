@@ -11,7 +11,9 @@ urlpatterns = [
         views.annotation_list_create_view,
         name="annotations",
     ),
-    path("articles/<path:slug_full>/", views.article_retrieve_view, name="article"),
+    path(
+        "articles/<path:slug_full>/", views.article_retrieve_update_view, name="article"
+    ),
     path(
         "annotations/<uuid>/",
         views.annotation_retrieve_update_destroy_view,
