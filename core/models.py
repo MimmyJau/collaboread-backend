@@ -46,7 +46,7 @@ class Article(MP_Node):
 
     @property
     def next(self):
-        """Get next node."""
+        """Get next node (excluding root nodes)."""
         try:
             if self.get_first_child():
                 return self.get_first_child()
@@ -55,6 +55,9 @@ class Article(MP_Node):
             current_node = self
             while current_node:
                 parent = current_node.get_parent()
+                if parent.is_root():
+                    # Don't want to jump to another book.
+                    return None
                 if parent and parent.get_next_sibling():
                     return parent.get_next_sibling()
                 current_node = parent
@@ -64,8 +67,11 @@ class Article(MP_Node):
 
     @property
     def prev(self):
-        """Get previous node."""
+        """Get previous node (excluding root nodes)."""
         try:
+            if self.is_root():
+                # Don't want it linking to a previous book
+                return None
             if self.get_prev_sibling():
                 current_node = self.get_prev_sibling()
                 while current_node:
