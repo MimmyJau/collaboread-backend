@@ -26,6 +26,13 @@ class CustomUserManager(UserManager):
 
         return self._create_user(username, email, password, **extra_fields)
 
+    def get_by_natural_key(self, username):
+        """
+        Make username case-insensitive.
+        Source: https://stackoverflow.com/a/33456271
+        """
+        return self.get(username__iexact=username)
+
 
 class User(AbstractUser):
     """Custom User"""

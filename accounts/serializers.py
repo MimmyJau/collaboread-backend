@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(RegisterSerializer):
     """Serializer for User Model."""
 
     class Meta:
