@@ -165,5 +165,6 @@ REST_FRAMEWORK = {
 # https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
 REST_AUTH = {
     "USER_DETAILS_SERIALIZER": "accounts.serializers.UserSerializer",
+    "REGISTER_SERIALIZER": "accounts.serializers.UserSerializer",
 }
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

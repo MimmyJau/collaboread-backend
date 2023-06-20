@@ -21,12 +21,15 @@ class ArticleAdmin(TreeAdmin):
             {
                 "fields": (
                     "uuid",
+                    "slug_section",
+                    "slug_full",
                     "user",
                     "title",
                     "author",
                     "article_html",
                     "article_json",
                     "article_text",
+                    "hidden",
                 )
             },
         ),

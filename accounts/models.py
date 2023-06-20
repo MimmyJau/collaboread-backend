@@ -5,7 +5,12 @@ from django.db import models
 
 
 class CustomUserManager(UserManager):
-    pass
+    def get_by_natural_key(self, username):
+        """
+        Make username case-insensitive.
+        Source: https://stackoverflow.com/a/33456271
+        """
+        return self.get(username__iexact=username)
 
 
 class User(AbstractUser):

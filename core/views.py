@@ -29,14 +29,14 @@ def index(request):
 class ArticleListAPIView(generics.ListAPIView):
     """View all articles"""
 
-    queryset = Article.get_root_nodes()
+    queryset = Article.get_root_nodes().filter(hidden=False)
     serializer_class = ArticleListSerializer
 
 
 article_list_view = ArticleListAPIView.as_view()
 
 
-class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
+class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     """View one article"""
 
     authentication_classes = [TokenAuthentication]
@@ -44,14 +44,14 @@ class ArticleRetrieveAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    lookup_field = "uuid"
+    lookup_field = "slug_full"
 
     def update(self, request, *args, **kwargs):
         request.data["user"] = request.user
         return super().update(request, *args, **kwargs)
 
 
-article_retrieve_view = ArticleRetrieveAPIView.as_view()
+article_retrieve_update_view = ArticleRetrieveUpdateAPIView.as_view()
 
 
 class TableOfContentsRetrieveView(generics.RetrieveAPIView):
@@ -59,7 +59,7 @@ class TableOfContentsRetrieveView(generics.RetrieveAPIView):
 
     queryset = Article.objects.all()
     serializer_class = TableOfContentsSerializer
-    lookup_field = "uuid"
+    lookup_field = "slug_full"
 
 
 table_of_contents_retrieve_view = TableOfContentsRetrieveView.as_view()
@@ -75,7 +75,7 @@ class AnnotationListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         # SELECT Annotations for a specific Article
         qs = Annotation.objects.filter(
-            article__uuid=self.kwargs["uuid"],
+            article__slug_full=self.kwargs["slug_full"],
         )
         # SELECT public annotations or user's annotations
         # Need conditional depending on whether user is logged in or not
