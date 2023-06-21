@@ -33,7 +33,7 @@ class Article(MP_Node):
     article_text = models.TextField(
         blank=True, help_text="Text output from WYSIWYG editor."
     )
-    hidden = models.BooleanField(default=False)
+    # hidden = models.BooleanField(default=False)
 
     @property
     def children(self):

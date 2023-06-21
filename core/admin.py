@@ -29,7 +29,7 @@ class ArticleAdmin(TreeAdmin):
                     "article_html",
                     "article_json",
                     "article_text",
-                    "hidden",
+                    # "hidden",
                 )
             },
         ),
