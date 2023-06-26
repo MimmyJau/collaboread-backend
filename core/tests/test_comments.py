@@ -16,7 +16,7 @@ class CommentAPITest(TestCase):
             title="Test Article",
             article_html="<p>Test Article HTML</p>",
             article_json={"test": "Test Article JSON"},
-            is_published=True,
+            article_text="Test Article Text",
         )
         self.annotation = Annotation.objects.create(
             user=self.user,
