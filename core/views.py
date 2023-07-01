@@ -11,12 +11,13 @@ from rest_framework.permissions import (
 import uuid
 
 from accounts.serializers import UserSerializer
-from .models import Annotation, Article, Comment
+from .models import Annotation, Article, Bookmark, Comment
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AnnotationSerializer,
     ArticleSerializer,
     ArticleListSerializer,
+    BookmarkSerializer,
     CommentSerializer,
     TableOfContentsSerializer,
 )
@@ -163,3 +164,15 @@ class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
 
 comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_view()
+
+
+class BookmarkListCreateAPIView(generics.ListCreateAPIView):
+    """List and create Bookmarks"""
+
+    serializer_class = BookmarkSerializer
+
+    def get_queryset(self):
+        return Bookmark.objects.filter(user=self.request.user)
+
+
+bookmark_list_create_view = BookmarkListCreateAPIView.as_view()

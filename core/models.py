@@ -175,3 +175,15 @@ class Comment(MP_Node):
 
     def __str__(self):
         return self.comment_html
+
+
+class Bookmark(models.Model):
+    """Bookmark: Keeps track of user's location in book usng range"""
+
+    uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    highlight_start = models.PositiveIntegerField()
+    highlight_end = models.PositiveIntegerField()

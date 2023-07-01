@@ -5,7 +5,7 @@ from rest_framework_recursive.fields import RecursiveField
 
 from bleach import clean
 
-from .models import Article, Annotation, Comment
+from .models import Article, Annotation, Bookmark, Comment
 
 allowed_tags = [
     "a",
@@ -236,3 +236,46 @@ class AnnotationSerializer(serializers.ModelSerializer):
             "is_public",
         ]
         read_only = ["uuid", "created_on", "updated_on"]
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    """Serializer for Bookmark model."""
+
+    class Meta:
+        model = Bookmark
+        fields = [
+            "uuid",
+            "user",
+            "article",
+            "created_on",
+            "updated_on",
+            "highlight_start",
+            "highlight_end",
+        ]
+        read_only = ["uuid", "created_on", "updated_on"]
+
+    user = serializers.SlugRelatedField(
+        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
+    )
+    article = serializers.SlugRelatedField(
+        queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
+    )
+
+    def validate(self, attrs):
+        """Ensure highlight contains at least one character"""
+        if attrs["highlight_start"] >= attrs["highlight_end"]:
+            raise serializers.ValidationError("End must be greater than start")
+        return attrs
+
+    def to_representation(self, instance):
+        return {
+            "uuid": instance.uuid,
+            "user": instance.user,
+            "article": instance.article,
+            "created_on": instance.created_on,
+            "updated_on": instance.updated_on,
+            "highlight": {
+                "start": instance.highlight_start,
+                "end": instance.highlight_end,
+            },
+        }

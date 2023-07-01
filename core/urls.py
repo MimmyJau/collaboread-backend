@@ -23,4 +23,5 @@ urlpatterns = [
     path(
         "comments/<uuid>/", views.comment_retrieve_update_destroy_view, name="comment"
     ),
+    path("bookmarks/", views.bookmark_list_create_view, name="bookmarks"),
 ]
