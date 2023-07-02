@@ -270,8 +270,8 @@ class BookmarkSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return {
             "uuid": instance.uuid,
-            "user": instance.user,
-            "article": instance.article,
+            "user": instance.user.username,
+            "article": instance.article.slug_full,
             "created_on": instance.created_on,
             "updated_on": instance.updated_on,
             "highlight": {

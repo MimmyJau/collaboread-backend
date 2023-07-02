@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Annotation, Comment
+from .models import Article, Annotation, Bookmark, Comment
 
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
@@ -72,6 +72,11 @@ class CommentAdmin(TreeAdmin):
     list_display = ("comment_text", "uuid", "user")
 
 
+class BookmarkAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Annotation, AnnotationAdmin)
+admin.site.register(Bookmark, BookmarkAdmin)
 admin.site.register(Comment, CommentAdmin)
