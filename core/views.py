@@ -1,9 +1,11 @@
+from bleach.linkifier import DEFAULT_CALLBACKS
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from rest_framework import generics
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -11,8 +13,9 @@ from rest_framework.permissions import (
 import uuid
 
 from accounts.serializers import UserSerializer
+from .mixins import MultipleFieldLookupMixin
 from .models import Annotation, Article, Bookmark, Comment
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsOwnerOnly
 from .serializers import (
     AnnotationSerializer,
     ArticleSerializer,
@@ -166,7 +169,7 @@ class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_view()
 
 
-class BookmarkListCreateAPIView(generics.ListCreateAPIView):
+class BookmarkCreateAPIView(generics.CreateAPIView):
     """List and create Bookmarks"""
 
     serializer_class = BookmarkSerializer
@@ -175,4 +178,28 @@ class BookmarkListCreateAPIView(generics.ListCreateAPIView):
         return Bookmark.objects.filter(user=self.request.user)
 
 
-bookmark_list_create_view = BookmarkListCreateAPIView.as_view()
+bookmark_create_view = BookmarkCreateAPIView.as_view()
+
+
+class BookmarkRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+    """Retrieve or update Bookmark"""
+
+    # SessionAuthentication is needed for the browsable API
+    # Source: https://stackoverflow.com/a/38626166
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsOwnerOnly]
+
+    queryset = Bookmark.objects.all()
+    serializer_class = BookmarkSerializer
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        # Need the .id: https://stackoverflow.com/a/71108056
+        queryset.filter(user=self.request.user.id)
+        queryset.filter(book__slug_full=self.kwargs.get("book"))
+        obj = get_object_or_404(queryset)  # Lookup the object
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+bookmark_retrieve_update_view = BookmarkRetrieveUpdateAPIView.as_view()

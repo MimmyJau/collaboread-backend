@@ -247,6 +247,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "uuid",
             "user",
             "article",
+            "book",
             "created_on",
             "updated_on",
             "highlight_start",
@@ -258,6 +259,9 @@ class BookmarkSerializer(serializers.ModelSerializer):
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
     article = serializers.SlugRelatedField(
+        queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
+    )
+    book = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
     )
 
@@ -272,6 +276,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "uuid": instance.uuid,
             "user": instance.user.username,
             "article": instance.article.slug_full,
+            "book": instance.book.slug_full,
             "created_on": instance.created_on,
             "updated_on": instance.updated_on,
             "highlight": {
