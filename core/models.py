@@ -187,9 +187,7 @@ class Bookmark(models.Model):
     )
     # Use "+" for related_name to avoid reverse accessor for this field
     # Source: https://docs.djangoproject.com/en/4.2/ref/models/fields/#django.db.models.ForeignKey.related_name
-    book = models.ForeignKey(
-        Article, on_delete=models.CASCADE, related_name="+", null=True
-    )
+    book = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="+")
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     highlight_start = models.PositiveIntegerField()
