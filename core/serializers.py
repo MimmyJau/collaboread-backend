@@ -279,8 +279,12 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "book": instance.book.slug_full,
             "created_on": instance.created_on,
             "updated_on": instance.updated_on,
-            "highlight": {
-                "start": instance.highlight_start,
-                "end": instance.highlight_end,
-            },
+            "highlight": [
+                {
+                    "characterRange": {
+                        "start": instance.highlight_start,
+                        "end": instance.highlight_end,
+                    }
+                }
+            ],
         }
