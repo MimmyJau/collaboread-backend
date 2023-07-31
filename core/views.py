@@ -1,3 +1,4 @@
+from bleach import linkify
 from bleach.linkifier import DEFAULT_CALLBACKS
 from django.contrib.auth import get_user_model
 from django.db.models import Q
@@ -13,7 +14,7 @@ from rest_framework.permissions import (
 import uuid
 
 from accounts.serializers import UserSerializer
-from .mixins import MultipleFieldLookupMixin
+from .mixins import AllowPUTAsCreateMixin, MultipleFieldLookupMixin
 from .models import Annotation, Article, Bookmark, Comment
 from .permissions import IsOwnerOrReadOnly, IsOwnerOnly
 from .serializers import (
@@ -186,7 +187,9 @@ class BookmarkCreateAPIView(generics.CreateAPIView):
 bookmark_create_view = BookmarkCreateAPIView.as_view()
 
 
-class BookmarkRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class BookmarkRetrieveUpdateAPIView(
+    AllowPUTAsCreateMixin, generics.RetrieveUpdateAPIView
+):
     """Retrieve or update Bookmark"""
 
     # SessionAuthentication is needed for the browsable API
@@ -196,6 +199,7 @@ class BookmarkRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
+    lookup_field = "uuid"
 
     def get_object(self):
         queryset = self.get_queryset()
