@@ -177,6 +177,11 @@ class BookmarkCreateAPIView(generics.CreateAPIView):
     def get_queryset(self):
         return Bookmark.objects.filter(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        print(request.user)
+        request.data["user"] = request.user
+        return super().create(request, *args, **kwargs)
+
 
 bookmark_create_view = BookmarkCreateAPIView.as_view()
 
@@ -195,11 +200,15 @@ class BookmarkRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         queryset = self.get_queryset()
         # Need the .id: https://stackoverflow.com/a/71108056
-        queryset.filter(user=self.request.user.id)
-        queryset.filter(book__slug_full=self.kwargs.get("book"))
+        queryset = queryset.filter(user=self.request.user.id)
+        queryset = queryset.filter(book__slug_full=self.kwargs.get("book"))
         obj = get_object_or_404(queryset)  # Lookup the object
         self.check_object_permissions(self.request, obj)
         return obj
+
+    def update(self, request, *args, **kwargs):
+        request.data["user"] = request.user
+        return super().update(request, *args, **kwargs)
 
 
 bookmark_retrieve_update_view = BookmarkRetrieveUpdateAPIView.as_view()
