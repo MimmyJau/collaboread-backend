@@ -199,7 +199,6 @@ class BookmarkRetrieveUpdateAPIView(
 
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
-    lookup_field = "uuid"
 
     def get_object(self):
         queryset = self.get_queryset()

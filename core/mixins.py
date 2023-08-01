@@ -5,6 +5,10 @@ from rest_framework.response import Response
 from rest_framework.request import clone_request
 
 
+# Source: https://gist.github.com/tomchristie/a2ace4577eff2c603b1b
+# WARNING: I've commented out the code in `if instance is None:` code block
+# which tries to use lookup_field as a field in the creation of the object.
+# I'm assuming that all the necessary data is provided in the request.
 class AllowPUTAsCreateMixin:
     """
     The following mixin class may be used in order to support PUT-as-create
@@ -19,9 +23,10 @@ class AllowPUTAsCreateMixin:
         serializer.is_valid(raise_exception=True)
 
         if instance is None:
-            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-            lookup_value = self.kwargs[lookup_url_kwarg]
-            extra_kwargs = {self.lookup_field: lookup_value}
+            extra_kwargs = {}
+            # lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+            # lookup_value = self.kwargs[lookup_url_kwarg]
+            # extra_kwargs = {self.lookup_field: lookup_value}
             serializer.save(**extra_kwargs)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
