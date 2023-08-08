@@ -161,6 +161,10 @@ REST_FRAMEWORK = {
     "JSON_UNDERSCOREIZE": {"ignore_keys": ("password1", "password2")},
 }
 
+# dj-allauth config
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_REQUIRED = True
+
 # Config for dj-rest-auth package. See link below for defaults.
 # https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
 REST_AUTH = {
