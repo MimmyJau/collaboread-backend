@@ -19,7 +19,6 @@ class AllowPUTAsCreateMixin:
         partial = kwargs.pop("partial", False)
         instance = self.get_object_or_none()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        print("Bookmark Serializer", serializer)
         serializer.is_valid(raise_exception=True)
 
         if instance is None:
