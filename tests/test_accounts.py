@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 BASE_URL = "http://localhost:8000"
 AUTH_BASE_URL = f"{BASE_URL}/auth"
 REGISTRATION_URL = f"{AUTH_BASE_URL}/registration/"
+LOGIN_URL = f"{AUTH_BASE_URL}/login/"
 
 
 class UserRegistrationTest(APITestCase):
@@ -143,3 +144,80 @@ class UserRegistrationTest(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("username", response.data)
+
+
+class UserLoginTest(APITestCase):
+    def setUp(self):
+        self.client.post(
+            REGISTRATION_URL,
+            {
+                "email": "test@email.com",
+                "username": "testuser",
+                "password1": "testpassword",
+                "password2": "testpassword",
+            },
+        )
+
+    def test_successful_login(self):
+        response = self.client.post(
+            LOGIN_URL,
+            {
+                "username": "testuser",
+                "password": "testpassword",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("key", response.data)
+
+    def test_successful_login_case_insensitive(self):
+        response = self.client.post(
+            LOGIN_URL,
+            {
+                "username": "TESTUSER",
+                "password": "testpassword",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("key", response.data)
+
+    def test_unsuccessful_login_nonexistent_username(self):
+        response = self.client.post(
+            LOGIN_URL,
+            {
+                "username": "wronguser",
+                "password": "testpassword",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("non_field_errors", response.data)
+
+    def test_unsuccessful_login_wrong_password(self):
+        response = self.client.post(
+            LOGIN_URL,
+            {
+                "username": "testuser",
+                "password": "wrongpassword",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("non_field_errors", response.data)
+
+    def test_unsuccessful_login_absent_username_field(self):
+        response = self.client.post(
+            LOGIN_URL,
+            {
+                "password": "wrongpassword",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("non_field_errors", response.data)
+
+    def test_unsuccessful_login_absent_email_field(self):
+        response = self.client.post(
+            LOGIN_URL,
+            {
+                "username": "testuser",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("password", response.data)
