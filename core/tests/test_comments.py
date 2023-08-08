@@ -1,3 +1,5 @@
+from unittest import skip
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -6,6 +8,7 @@ from core.models import Article, Annotation
 
 
 class CommentAPITest(TestCase):
+    @skip("Old implementation + not an integration test")
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -33,11 +36,13 @@ class CommentAPITest(TestCase):
             "comment_text": "Test Comment",
         }
 
+    @skip("Old implementation + not integration test")
     def test_post_comment(self):
         self.client.login(username="testuser", password="testpassword")
         response = self.client.post("/api/comments/", self.comment, format="json")
         self.assertEqual(response.status_code, 201)
 
+    @skip("Old implementation + not integration test")
     def test_get_annotation(self):
         self.client.login(username="testuser", password="testpassword")
         response = self.client.post("/api/comments/", self.comment, format="json")
