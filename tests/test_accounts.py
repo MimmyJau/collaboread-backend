@@ -39,6 +39,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("username", response.data)
 
     def test_registration_missing_email(self):
         response = self.client.post(
@@ -50,6 +51,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.data)
 
     def test_registration_missing_password1(self):
         response = self.client.post(
@@ -61,6 +63,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("password1", response.data)
 
     def test_registration_missing_password2(self):
         response = self.client.post(
@@ -72,6 +75,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("password2", response.data)
 
     def test_registration_passwords_not_matching(self):
         response = self.client.post(
@@ -84,6 +88,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("non_field_errors", response.data)
 
     def test_registration_with_existing_email(self):
         response = self.client.post(
@@ -96,6 +101,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.data)
 
     def test_registration_with_existing_username(self):
         response = self.client.post(
@@ -108,6 +114,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("username", response.data)
 
     def test_registration_with_existing_email_in_different_case(self):
         response = self.client.post(
@@ -120,6 +127,7 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.data)
 
     def test_registration_with_existing_username_in_different_case(self):
         response = self.client.post(
@@ -132,3 +140,4 @@ class UserRegistrationTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        self.assertIn("username", response.data)
