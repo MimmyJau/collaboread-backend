@@ -166,5 +166,7 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     "USER_DETAILS_SERIALIZER": "accounts.serializers.UserSerializer",
     "REGISTER_SERIALIZER": "accounts.serializers.UserSerializer",
+    "SESSION_LOGIN": False,
 }
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
