@@ -236,7 +236,7 @@ class UserRetrieveTest(APITestCase):
         )
         self.token = response.data["key"]
 
-    def test_successful_user_retrive(self):
+    def test_successful_user_retrieve(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.get(f"{AUTH_BASE_URL}/user/")
         self.assertEqual(response.status_code, 200)
