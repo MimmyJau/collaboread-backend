@@ -221,3 +221,35 @@ class UserLoginTest(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("password", response.data)
+
+
+class UserRetrieveTest(APITestCase):
+    def setUp(self):
+        response = self.client.post(
+            REGISTRATION_URL,
+            {
+                "email": "test@email.com",
+                "username": "testuser",
+                "password1": "testpassword",
+                "password2": "testpassword",
+            },
+        )
+        self.token = response.data["key"]
+
+    def test_successful_user_retrive(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.get(f"{AUTH_BASE_URL}/user/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data, {"username": "testuser", "email": "test@email.com"}
+        )
+        self.assertNotIn("password", response.data)
+
+    def test_unsuccessful_user_retrieve_no_token(self):
+        response = self.client.get(f"{AUTH_BASE_URL}/user/")
+        self.assertEqual(response.status_code, 401)
+
+    def test_unsuccessful_user_retrieve_wrong_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token + "abc")
+        response = self.client.get(f"{AUTH_BASE_URL}/user/")
+        self.assertEqual(response.status_code, 401)

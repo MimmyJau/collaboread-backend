@@ -156,7 +156,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.SessionAuthentication", # needed for using Browsable API, but otherwise adds complexity
     ],
     "JSON_UNDERSCOREIZE": {"ignore_keys": ("password1", "password2")},
 }
