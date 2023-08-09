@@ -41,6 +41,27 @@ class ArticleListAPIView(generics.ListAPIView):
 article_list_view = ArticleListAPIView.as_view()
 
 
+class ArticleCreateRootAPIView(generics.CreateAPIView):
+    pass
+
+
+article_create_root_view = ArticleCreateRootAPIView.as_view()
+
+
+class ArticleCreateChildAPIView(generics.CreateAPIView):
+    pass
+
+
+article_create_child_view = ArticleCreateChildAPIView.as_view()
+
+
+class ArticleCreateSiblingAPIView(generics.CreateAPIView):
+    pass
+
+
+article_create_sibling_view = ArticleCreateSiblingAPIView.as_view()
+
+
 class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     """View one article"""
 
