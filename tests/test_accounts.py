@@ -255,3 +255,9 @@ class UserRetrieveTest(APITestCase):
         response = self.client.get(f"{AUTH_BASE_URL}/user/")
         self.assertEqual(response.status_code, 401)
         self.assertNotIn("password", response.data)
+
+    def test_unsuccessful_user_retrive_wrong_header(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+        response = self.client.get(f"{AUTH_BASE_URL}/user/")
+        self.assertEqual(response.status_code, 401)
+        self.assertNotIn("password", response.data)
