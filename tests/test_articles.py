@@ -140,6 +140,10 @@ class ArticleCreateTest(APITestCase):
         )
         self.assertEqual(response.status_code, 401)
 
+    # test adding an article with the same name, does it come back with different slug?
+    # test adding 10 articles with the same now, do they all come back with different slugs?
+    # test adding a child article with the same name, is slug uneffected?
+
 
 class ArticleListTest(APITestCase):
     # test that list returns if logged in
