@@ -37,11 +37,12 @@ class Article(MP_Node):
 
     @property
     def children(self):
+        """Used by TOC serializer to get all articles"""
         return self.get_children()
 
     @property
     def level(self):
-        """Get depth of node. The field name 'depth' doesn't work."""
+        """Used by TOC serializer to determine indent level. Note that fidle name 'depth' doesn't work."""
         return self.get_depth()
 
     @property
@@ -87,6 +88,7 @@ class Article(MP_Node):
         except ObjectDoesNotExist:
             return None
 
+    # Don't think this is used anywhere
     @property
     def slugs(self):
         """Get list of slugs of ancestor node."""
