@@ -6,9 +6,8 @@ AUTH_BASE_URL = f"{BASE_URL}/auth"
 REGISTRATION_URL = f"{AUTH_BASE_URL}/registration/"
 LOGIN_URL = f"{AUTH_BASE_URL}/login/"
 
-ARTICLE_LIST_URL = f"{BASE_URL}/api/articles/"
-ARTICLE_CREATE_ROOT_URL = f"{ARTICLE_LIST_URL}/add-root/"
-ARTICLE_DETAIL_URL = f"{BASE_URL}/api/article/"
+API_BASE_URL = f"{BASE_URL}/api"
+ARTICLE_CREATE_ROOT_URL = f"{API_BASE_URL}/articles/add-root/"
 
 
 class ArticleCreateTest(APITestCase):
@@ -36,6 +35,7 @@ class ArticleCreateTest(APITestCase):
                 "hidden": False,
             },
         )
+        print(response.data)
         self.assertEqual(response.status_code, 201)
         self.assertIn("uuid", response.data)
         self.assertIn("user", response.data)
