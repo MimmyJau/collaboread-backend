@@ -4,8 +4,6 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("articles/", views.article_list_view, name="articles"),
-    path("articles/add-root/", views.article_create_root_view, name="article-add-root"),
     path(
         "articles/<path:slug_full>/add-child/",
         views.article_create_child_view,
@@ -16,6 +14,8 @@ urlpatterns = [
         views.article_create_sibling_view,
         name="article-add-sibling",
     ),
+    path("articles/add-root/", views.article_create_root_view, name="article-add-root"),
+    path("articles/", views.article_list_view, name="articles"),
     path("toc/<slug_full>/", views.table_of_contents_retrieve_view, name="toc"),
     path(
         "articles/<path:slug_full>/annotations/",
