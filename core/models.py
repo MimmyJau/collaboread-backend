@@ -1,5 +1,3 @@
-from ctypes import create_string_buffer
-import datetime
 from slugify import slugify
 import uuid
 
