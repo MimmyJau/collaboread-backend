@@ -45,7 +45,7 @@ class ArticleCreateRootAPIView(generics.CreateAPIView):
     """Create a root article"""
 
     serializer_class = ArticleSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
