@@ -91,7 +91,14 @@ class ArticleSerializer(serializers.ModelSerializer):
             "prev",
             "next",
         ]
-        read_only = ["uuid", "slug_full", "created_on", "updated_on", "prev", "next"]
+        read_only_fields = [
+            "uuid",
+            "slug_full",
+            "created_on",
+            "updated_on",
+            "prev",
+            "next",
+        ]
         extra_kwargs = {
             "article_json": {"write_only": True},
             "article_text": {"write_only": True},
@@ -99,6 +106,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
+
         rep["article_html"] = clean(
             instance.article_html,
             attributes=allowed_attributes,
