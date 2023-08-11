@@ -31,9 +31,7 @@ class Article(MP_Node):
     author = models.CharField(max_length=100, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    article_html = models.TextField(
-        blank=True, help_text="HTML output from WYSIWYG editor."
-    )
+    article_html = models.TextField(help_text="HTML output from WYSIWYG editor.")
     article_json = models.JSONField(
         blank=True, null=True, help_text="JSON output specific to ProseMirror."
     )
