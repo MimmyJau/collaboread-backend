@@ -79,7 +79,7 @@ class ArticleCreateTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("non_field_errors", response.data)
+        self.assertIn("title", response.data)
 
     def test_unsuccessful_create_root_article_missing_article_html(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -93,7 +93,7 @@ class ArticleCreateTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("non_field_errors", response.data)
+        self.assertIn("article_html", response.data)
 
     def test_unsuccessful_create_root_article_empty_string_title(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
