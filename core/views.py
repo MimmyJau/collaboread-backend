@@ -1,17 +1,17 @@
-from bleach import linkify
-from bleach.linkifier import DEFAULT_CALLBACKS
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
-import uuid
+from rest_framework.response import Response
 
 from accounts.serializers import UserSerializer
 from .mixins import AllowPUTAsCreateMixin, MultipleFieldLookupMixin
@@ -42,7 +42,35 @@ article_list_view = ArticleListAPIView.as_view()
 
 
 class ArticleCreateRootAPIView(generics.CreateAPIView):
-    pass
+    """Create a root article"""
+
+    serializer_class = ArticleSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create because by default, CreateAPIView passes validated_data to
+        .to_representation(), which throws an error since validated_data is an
+        OrderedDict, not an Article object. Thus it cannot properly call @property
+        methods like `prev` and `next`.
+
+        Instead, we pass the newly created instance to .to_representation() in the
+        same way a GET request would.
+        """
+        request.data["user"] = request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = self.perform_create(serializer)
+        serializer = self.get_serializer(instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def perform_create(self, serializer):
+        """We override this method to use MP_Node's API."""
+        return Article.create_root(**serializer.validated_data)
 
 
 article_create_root_view = ArticleCreateRootAPIView.as_view()

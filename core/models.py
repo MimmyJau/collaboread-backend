@@ -9,6 +9,15 @@ from django.utils.timezone import make_aware
 from treebeard.mp_tree import MP_Node
 
 
+"""
+Decision to use MP_Node is as follows:
+1) We want the entire path of a section in a book to be unique,
+2) Uniqueness only requires comparing against siblings,
+3) It better matches how we imagine sections and articles to be structured.
+4) We want a path field to uniquely identify the resource.
+"""
+
+
 class Article(MP_Node):
     """Text: Anything that can be read by a user."""
 
@@ -54,7 +63,7 @@ class Article(MP_Node):
             current_node = self
             while current_node:
                 parent = current_node.get_parent()
-                if parent.is_root():
+                if not parent or parent.is_root():
                     # Don't want to jump to another book.
                     return None
                 if parent and parent.get_next_sibling():
@@ -99,6 +108,35 @@ class Article(MP_Node):
             return parent_slugs
         return [str(self.uuid)]
 
+    @classmethod
+    def get_slug(cls, **data):
+        slug = data.get(
+            "slug_section", None
+        )  # need to use .get() in case it doesn't exist
+        if slug is None:
+            slug = slugify(data["title"], max_length=50)
+        results = cls.get_root_nodes().filter(slug_section=slug)
+        count = 1
+        while True:
+            # don't use `if results is not None:` because that will check
+            # for None explicitly, which an empty queryset is not.
+            # on the other hand, an empty queryset is falsey.
+            if not results:
+                data["slug_section"] = slug
+                break
+            slug = f"{slug}-{count}"
+            results = cls.get_root_nodes().filter(slug_section=slug)
+            count += 1
+        return slug
+
+    @classmethod
+    def create_root(cls, **data):
+        data["slug_section"] = cls.get_slug(**data)
+        data["slug_full"] = data["slug_section"]
+        return cls.add_root(**data)
+
+    # Who is even calling this method?
+    # Seems to be used in migrations....
     def save(self, *args, **kwargs):
         """Override save method to generate slugs."""
         # Generate section slug if it doesn't already exist
