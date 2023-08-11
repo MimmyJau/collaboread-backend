@@ -139,9 +139,38 @@ class ArticleCreateTest(APITestCase):
         )
         self.assertEqual(response.status_code, 401)
 
-    # test adding an article with the same name, does it come back with different slug?
+    def test_successful_create_two_root_articles_with_same_title(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response1 = self.client.post(
+            ARTICLE_CREATE_ROOT_URL,
+            {
+                "title": "Test Article",
+                "articleHtml": "<p>This is a test article</p>",
+                "articleJson": "{}",
+                "articleText": "This is a test article",
+                "hidden": False,
+            },
+        )
+        response2 = self.client.post(
+            ARTICLE_CREATE_ROOT_URL,
+            {
+                "title": "Test Article",
+                "articleHtml": "<p>This is a test article</p>",
+                "articleJson": "{}",
+                "articleText": "This is a test article",
+                "hidden": False,
+            },
+        )
+        self.assertEqual(response1.status_code, 201)
+        self.assertEqual(response2.status_code, 201)
+        self.assertNotEqual(response1.data["slug_full"], response2.data["slug_full"])
+        self.assertEqual(
+            response1.data["slug_full"] + "-1", response2.data["slug_full"]
+        )
+
     # test adding 10 articles with the same now, do they all come back with different slugs?
     # test adding a child article with the same name, is slug uneffected?
+    # test that object coming back is exactly what i think it is (just test keys and nested structure)
 
 
 class ArticleListTest(APITestCase):
