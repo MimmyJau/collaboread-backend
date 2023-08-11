@@ -35,7 +35,6 @@ class ArticleCreateTest(APITestCase):
                 "hidden": False,
             },
         )
-        print(response.data)
         self.assertEqual(response.status_code, 201)
         self.assertIn("uuid", response.data)
         self.assertIn("user", response.data)
