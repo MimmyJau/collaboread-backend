@@ -284,6 +284,14 @@ class ArticleCreateChildTest(APITestCase):
         self.assertEqual(len(root_articles.data), 1)
 
     # add child to a non-existent parent node
+    def test_unsuccessful_create_child_article_of_nonexistent_parent(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.post(
+            f"{API_BASE_URL}/articles/non-existent-node/add-child/",
+            valid_article_payload,
+        )
+        self.assertEqual(response.status_code, 404)
+
     # test that object coming back is exactly what i think it is (just test keys and nested structure)
 
 

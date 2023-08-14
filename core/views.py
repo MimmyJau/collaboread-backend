@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -105,9 +106,12 @@ class ArticleCreateChildAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         """We override this method to use MP_Node's API."""
-        return Article.create_child(
-            self.kwargs["parent_path"], **serializer.validated_data
-        )
+        try:
+            return Article.create_child(
+                self.kwargs["parent_path"], **serializer.validated_data
+            )
+        except Article.DoesNotExist:
+            raise NotFound(detail="Parent article not found.", code=404)
 
 
 article_create_child_view = ArticleCreateChildAPIView.as_view()
