@@ -140,26 +140,29 @@ class ArticleCreateChildTest(APITestCase):
     def setUp(self):
         response = self.client.post(REGISTRATION_URL, valid_user_payload)
         self.token = response.data["key"]
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(ARTICLE_CREATE_ROOT_URL, valid_article_payload)
         self.parent_slug = response.data["slug_full"]
+        self.ARTICLE_CREATE_CHILD_URL = (
+            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child/"
+        )
+        self.client.credentials()
 
     def test_successful_create_child_article(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             valid_article_payload,
         )
         self.assertEqual(response.status_code, 201)
         self.assertIn("uuid", response.data)
         self.assertIn("user", response.data)
         self.assertIn("slug_full", response.data)
-        self.assertEqual(
-            response.data["slug_full"], self.parent_slug + "/" + response.data["title"]
-        )
+        self.assertEqual(response.data["slug_full"], self.parent_slug + "/test-article")
 
     def test_unsuccessful_create_child_article_missing_token(self):
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             valid_article_payload,
         )
         self.assertEqual(response.status_code, 401)
@@ -167,7 +170,7 @@ class ArticleCreateChildTest(APITestCase):
     def test_unsuccessful_create_child_article_invalid_token(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token + "abc")
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             valid_article_payload,
         )
         self.assertEqual(response.status_code, 401)
@@ -177,7 +180,7 @@ class ArticleCreateChildTest(APITestCase):
         invalid_article_payload = copy.deepcopy(valid_article_payload)
         del invalid_article_payload["title"]
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             invalid_article_payload,
         )
         self.assertEqual(response.status_code, 400)
@@ -188,7 +191,7 @@ class ArticleCreateChildTest(APITestCase):
         invalid_article_payload = copy.deepcopy(valid_article_payload)
         del invalid_article_payload["articleHtml"]
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             invalid_article_payload,
         )
         self.assertEqual(response.status_code, 400)
@@ -199,7 +202,7 @@ class ArticleCreateChildTest(APITestCase):
         invalid_article_payload = copy.deepcopy(valid_article_payload)
         invalid_article_payload["title"] = ""
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             invalid_article_payload,
         )
         self.assertEqual(response.status_code, 400)
@@ -224,7 +227,7 @@ class ArticleCreateChildTest(APITestCase):
             Symmetry breaking and tunneling relate through the collapse of a particle into non-symmetric state as it seeks a lower energy.
         """
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             invalid_article_payload,
         )
         self.assertEqual(response.status_code, 400)
@@ -235,7 +238,7 @@ class ArticleCreateChildTest(APITestCase):
         invalid_article_payload = copy.deepcopy(valid_article_payload)
         invalid_article_payload["articleJson"] = "this is invalid json"
         response = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             invalid_article_payload,
         )
         self.assertEqual(response.status_code, 401)
@@ -243,11 +246,11 @@ class ArticleCreateChildTest(APITestCase):
     def test_successful_create_two_child_articles_with_same_title(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response_1 = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             valid_article_payload,
         )
         response_2 = self.client.post(
-            f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+            self.ARTICLE_CREATE_CHILD_URL,
             valid_article_payload,
         )
         self.assertEqual(response_1.status_code, 201)
@@ -264,7 +267,7 @@ class ArticleCreateChildTest(APITestCase):
         for i in range(10):
             responses.append(
                 self.client.post(
-                    f"{API_BASE_URL}/articles/{self.parent_slug}/add-child",
+                    self.ARTICLE_CREATE_CHILD_URL,
                     valid_article_payload,
                 )
             )
@@ -276,10 +279,11 @@ class ArticleCreateChildTest(APITestCase):
                 response_a.data["slug_full"], response_b.data["slug_full"]
             )
 
-        all_articles = self.client.get(ARTICLE_LIST_URL)
-        self.assertEqual(all_articles.status_code, 200)
-        self.assertEqual(len(all_articles.data), 10)
+        root_articles = self.client.get(ARTICLE_LIST_URL)
+        self.assertEqual(root_articles.status_code, 200)
+        self.assertEqual(len(root_articles.data), 1)
 
+    # add child to a non-existent parent node
     # test that object coming back is exactly what i think it is (just test keys and nested structure)
 
 
