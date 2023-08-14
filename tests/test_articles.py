@@ -1,3 +1,5 @@
+import itertools
+
 from rest_framework.test import APITestCase
 
 BASE_URL = "http://localhost:8000"
@@ -8,6 +10,7 @@ LOGIN_URL = f"{AUTH_BASE_URL}/login/"
 
 API_BASE_URL = f"{BASE_URL}/api"
 ARTICLE_CREATE_ROOT_URL = f"{API_BASE_URL}/articles/add-root/"
+ARTICLE_LIST_URL = f"{API_BASE_URL}/articles/"
 
 
 class ArticleCreateTest(APITestCase):
@@ -169,6 +172,34 @@ class ArticleCreateTest(APITestCase):
         )
 
     # test adding 10 articles with the same now, do they all come back with different slugs?
+    def test_successful_create_ten_root_articles_with_same_title(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        responses = []
+        for i in range(10):
+            responses.append(
+                self.client.post(
+                    ARTICLE_CREATE_ROOT_URL,
+                    {
+                        "title": "Test Article",
+                        "articleHtml": "<p>This is a test article</p>",
+                        "articleJson": "{}",
+                        "articleText": "This is a test article",
+                        "hidden": False,
+                    },
+                )
+            )
+        for response in responses:
+            self.assertEqual(response.status_code, 201)
+
+        for response_a, response_b in itertools.combinations(responses, 2):
+            self.assertNotEqual(
+                response_a.data["slug_full"], response_b.data["slug_full"]
+            )
+
+        all_articles = self.client.get(ARTICLE_LIST_URL)
+        self.assertEqual(all_articles.status_code, 200)
+        self.assertEqual(len(all_articles.data), 10)
+
     # test adding a child article with the same name, is slug uneffected?
     # test that object coming back is exactly what i think it is (just test keys and nested structure)
 
