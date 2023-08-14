@@ -107,16 +107,23 @@ class Article(MP_Node):
         return [str(self.uuid)]
 
     @classmethod
-    def get_slug(cls, **data):
-        slug = data.get(
-            "slug_section", None
-        )  # need to use .get() in case it doesn't exist
+    def get_slug(cls, parent_path=None, **data):
+        # Use .get() in case slug field doesn't exist.
+        slug = data.get("slug_section", None)
+        # If slug doesn't exist, generate one.
         if slug is None:
             slug = slugify(data["title"], max_length=50)
-        results = cls.get_root_nodes().filter(slug_section=slug)
+        # Check if there are siblings with the same slug.
+        if parent_path is not None:
+            # This branch if node being inserted is not the root.
+            parent = Article.objects.get(slug_full=parent_path)
+            results = parent.get_children().filter(slug_section=slug)
+        else:
+            # This branch if node being inserted is a root.
+            results = cls.get_root_nodes().filter(slug_section=slug)
         count = 1
         while True:
-            # don't use `if results is not None:` because that will check
+            # Don't use `if results is not None:` because that will check
             # for None explicitly, which an empty queryset is not.
             # on the other hand, an empty queryset is falsey.
             if not results:
@@ -128,9 +135,16 @@ class Article(MP_Node):
         return slug
 
     @classmethod
+    def get_path(cls, slug, parent_path=None):
+        if parent_path is None:
+            return slug
+        parent = Article.objects.get(slug_full=parent_path)
+        return parent.slug_full + "/" + slug
+
+    @classmethod
     def create_root(cls, **data):
-        data["slug_section"] = cls.get_slug(**data)
-        data["slug_full"] = data["slug_section"]
+        data["slug_section"] = cls.get_slug(None, **data)
+        data["slug_full"] = cls.get_path(data["slug_section"], None)
         return cls.add_root(**data)
 
     # Who is even calling this method?
