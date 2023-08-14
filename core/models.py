@@ -147,6 +147,14 @@ class Article(MP_Node):
         data["slug_full"] = cls.get_path(data["slug_section"], None)
         return cls.add_root(**data)
 
+    @classmethod
+    def create_child(cls, parent_path, **data):
+        # TODO throw error if parent does not exist
+        parent = Article.objects.get(slug_full=parent_path)
+        data["slug_section"] = cls.get_slug(parent_path, **data)
+        data["slug_full"] = cls.get_path(data["slug_section"], parent_path)
+        return parent.add_child(**data)
+
     # Who is even calling this method?
     # Seems to be used in migrations....
     def save(self, *args, **kwargs):

@@ -77,7 +77,37 @@ article_create_root_view = ArticleCreateRootAPIView.as_view()
 
 
 class ArticleCreateChildAPIView(generics.CreateAPIView):
-    pass
+    """Create a child article"""
+
+    serializer_class = ArticleSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create because by default, CreateAPIView passes validated_data to
+        .to_representation(), which throws an error since validated_data is an
+        OrderedDict, not an Article object. Thus it cannot properly call @property
+        methods like `prev` and `next`.
+
+        Instead, we pass the newly created instance to .to_representation() in the
+        same way a GET request would.
+        """
+        request.data["user"] = request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = self.perform_create(serializer)
+        serializer = self.get_serializer(instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def perform_create(self, serializer):
+        """We override this method to use MP_Node's API."""
+        return Article.create_child(
+            self.kwargs["parent_path"], **serializer.validated_data
+        )
 
 
 article_create_child_view = ArticleCreateChildAPIView.as_view()

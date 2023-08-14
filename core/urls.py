@@ -5,12 +5,12 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path(
-        "articles/<path:slug_full>/add-child/",
+        "articles/<path:parent_path>/add-child/",
         views.article_create_child_view,
         name="article-add-child",
     ),
     path(
-        "articles/<path:slug_full>/add-sibling/",
+        "articles/<path:parent_path>/add-sibling/",
         views.article_create_sibling_view,
         name="article-add-sibling",
     ),
