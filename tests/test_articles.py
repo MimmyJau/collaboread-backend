@@ -20,6 +20,13 @@ valid_user_payload = {
     "password2": "testpassword",
 }
 
+valid_second_user_payload = {
+    "username": "anotheruser",
+    "email": "another@email.com",
+    "password1": "testpassword",
+    "password2": "testpassword",
+}
+
 valid_article_payload = {
     "title": "Test Article",
     "articleHtml": "<p>This is a test article</p>",
@@ -138,6 +145,7 @@ class ArticleCreateRootTest(APITestCase):
 
 class ArticleCreateChildTest(APITestCase):
     def setUp(self):
+        # Create first user and store data.
         response = self.client.post(REGISTRATION_URL, valid_user_payload)
         self.token = response.data["key"]
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -147,6 +155,10 @@ class ArticleCreateChildTest(APITestCase):
             f"{API_BASE_URL}/articles/{self.parent_slug}/add-child/"
         )
         self.client.credentials()
+
+        # Create second user and store token.
+        response_user_2 = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        self.token_2 = response_user_2.data["key"]
 
     def test_successful_create_child_article(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -292,19 +304,28 @@ class ArticleCreateChildTest(APITestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_unsuccessful_create_child_article_for_parent_owned_by_another_user(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token_2)
+        response = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL,
+            valid_article_payload,
+        )
+        self.assertEqual(response.status_code, 403)
+
     # test that object coming back is exactly what i think it is (just test keys and nested structure)
 
 
 class ArticleListTest(APITestCase):
     # test that list returns if logged in
     # test that list returns if not logged in
+    # test returning article that has a <script> or other dangerous tags that bleach does not allow
     pass
 
 
 class ArticleRetrieveTest(APITestCase):
     # test that article returns if logged in
     # test that article returns if not logged in
-    # test that
+    # test returning article that has a <script> or other dangerous tags that bleach does not allow
     pass
 
 
