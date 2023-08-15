@@ -1,4 +1,8 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework import permissions
+
+from core.models import Article
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -29,3 +33,14 @@ class IsOwnerOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
+
+
+class IsOwnerOfParentArticle(permissions.BasePermission):
+    """
+    Custom persmission for mutative views that act on child nodes.
+    """
+
+    def has_permission(self, request, view):
+        parent_path = view.kwargs.get("parent_path")
+        parent = get_object_or_404(Article, slug_full=parent_path)
+        return parent.user == request.user

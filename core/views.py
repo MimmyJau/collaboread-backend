@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from accounts.serializers import UserSerializer
 from .mixins import AllowPUTAsCreateMixin, MultipleFieldLookupMixin
 from .models import Annotation, Article, Bookmark, Comment
-from .permissions import IsOwnerOrReadOnly, IsOwnerOnly
+from .permissions import IsOwnerOnly, IsOwnerOfParentArticle, IsOwnerOrReadOnly
 from .serializers import (
     AnnotationSerializer,
     ArticleSerializer,
@@ -82,7 +82,7 @@ class ArticleCreateChildAPIView(generics.CreateAPIView):
 
     serializer_class = ArticleSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOfParentArticle]
 
     def create(self, request, *args, **kwargs):
         """
