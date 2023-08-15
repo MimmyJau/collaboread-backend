@@ -12,6 +12,7 @@ LOGIN_URL = f"{AUTH_BASE_URL}/login/"
 API_BASE_URL = f"{BASE_URL}/api"
 ARTICLE_CREATE_ROOT_URL = f"{API_BASE_URL}/articles/add-root/"
 ARTICLE_LIST_URL = f"{API_BASE_URL}/articles/"
+ARTICLE_DETAIL_URL = f"{API_BASE_URL}/articles"
 
 valid_user_payload = {
     "username": "testuser",
@@ -398,7 +399,55 @@ class ArticleListTest(APITestCase):
 
 class ArticleRetrieveTest(APITestCase):
     # test that article returns if logged in
+    def setUp(self):
+        # Create user.
+        response = self.client.post(REGISTRATION_URL, valid_user_payload)
+        self.token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create parent.
+        self.parent = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload, format="json"
+        ).data
+        # test printing out what parent shows here
+        # Create child.
+        # self.ARTICLE_CREATE_CHILD_URL = (
+        #     f"{API_BASE_URL}/articles/{self.parent['slug_full']}/add-child/"
+        # )
+        # self.child = self.client.post(
+        #     self.ARTICLE_CREATE_CHILD_URL, valid_article_payload
+        # ).data
+        self.client.credentials()
+
     # test that article returns if not logged in
+    def test_successful_retrieve_parent_article_with_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        print(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/", format="json"
+        )
+        print(response.data)
+        # self.assertEqual(response.status_code, 200)
+        # self.assertIn("title", response.data)
+        # self.assertIn("slugFull", response.data)
+        # self.assertIn("user", response.data)
+        # self.assertIn("articleHtml", response.data)
+        # self.assertIn("articleJson", response.data)
+        # self.assertIn("articleText", response.data)
+
+    # test that article returns if not logged in
+    def test_successful_retrieve_child_article_with_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        print(response)
+        # self.assertEqual(response.status_code, 200)
+        # self.assertIn("title", response.data)
+        # self.assertIn("slugFull", response.data)
+        # self.assertIn("user", response.data)
+        # self.assertIn("articleHtml", response.data)
+        # self.assertIn("articleJson", response.data)
+        # self.assertIn("articleText", response.data)
+
     # test that list does not return a hidden article
     # test returning article that has a <script> or other dangerous tags that bleach does not allow
     pass
