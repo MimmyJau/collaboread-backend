@@ -172,6 +172,31 @@ class ArticleCreateChildTest(APITestCase):
         self.assertIn("slug_full", response.data)
         self.assertEqual(response.data["slug_full"], self.parent_slug + "/test-article")
 
+    def test_successful_create_child_article_of_a_child_article(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        responses = []
+        url = self.ARTICLE_CREATE_CHILD_URL
+        for i in range(10):
+            responses.append(
+                self.client.post(
+                    url,
+                    valid_article_payload,
+                )
+            )
+            url = (
+                f"{API_BASE_URL}/articles/{responses[-1].data['slug_full']}/add-child/"
+            )
+        for idx, response in enumerate(responses):
+            self.assertEqual(response.status_code, 201)
+            self.assertIn("uuid", response.data)
+            self.assertIn("user", response.data)
+            self.assertIn("slug_full", response.data)
+            if idx == 0:
+                parent_slug = self.parent_slug
+            else:
+                parent_slug = responses[idx - 1].data["slug_full"]
+            self.assertEqual(response.data["slug_full"], parent_slug + "/test-article")
+
     def test_unsuccessful_create_child_article_missing_token(self):
         response = self.client.post(
             self.ARTICLE_CREATE_CHILD_URL,
@@ -312,13 +337,12 @@ class ArticleCreateChildTest(APITestCase):
         )
         self.assertEqual(response.status_code, 403)
 
-    # test that object coming back is exactly what i think it is (just test keys and nested structure)
-
 
 class ArticleListTest(APITestCase):
     # test that list returns if logged in
     # test that list returns if not logged in
     # test returning article that has a <script> or other dangerous tags that bleach does not allow
+    # test that object coming back is exactly what i think it is (just test keys and nested structure)
     pass
 
 
