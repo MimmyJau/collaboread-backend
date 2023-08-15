@@ -35,6 +35,14 @@ valid_article_payload = {
     "hidden": False,
 }
 
+valid_hidden_article_payload = {
+    "title": "Test Article",
+    "articleHtml": "<p>This is a test article</p>",
+    "articleJson": "{}",
+    "articleText": "This is a test article",
+    "hidden": True,
+}
+
 
 class ArticleCreateRootTest(APITestCase):
     def setUp(self):
@@ -145,7 +153,7 @@ class ArticleCreateRootTest(APITestCase):
 
 class ArticleCreateChildTest(APITestCase):
     def setUp(self):
-        # Create first user and store data.
+        # Create first user and store token.
         response = self.client.post(REGISTRATION_URL, valid_user_payload)
         self.token = response.data["key"]
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -339,16 +347,59 @@ class ArticleCreateChildTest(APITestCase):
 
 
 class ArticleListTest(APITestCase):
-    # test that list returns if logged in
-    # test that list returns if not logged in
-    # test returning article that has a <script> or other dangerous tags that bleach does not allow
-    # test that object coming back is exactly what i think it is (just test keys and nested structure)
-    pass
+    def setUp(self):
+        # Create first user and store token.
+        response = self.client.post(REGISTRATION_URL, valid_user_payload)
+        self.token = response.data["key"]
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create root article.
+        response = self.client.post(ARTICLE_CREATE_ROOT_URL, valid_article_payload)
+        # Create hidden root article.
+        response = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_hidden_article_payload
+        )
+        parent_slug = response.data["slug_full"]
+        # Create child article.
+        self.client.post(
+            f"{API_BASE_URL}/articles/{parent_slug}/add-child/",
+            valid_article_payload,
+        )
+        self.client.credentials()
+
+        # Create second user and store token.
+        response_user_2 = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        self.token_2 = response_user_2.data["key"]
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create root article.
+        response = self.client.post(ARTICLE_CREATE_ROOT_URL, valid_article_payload)
+        # Create hidden root article.
+        response = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_hidden_article_payload
+        )
+        parent_slug = response.data["slug_full"]
+        # Create child article.
+        self.client.post(
+            f"{API_BASE_URL}/articles/{parent_slug}/add-child/",
+            valid_article_payload,
+        )
+        self.client.credentials()
+
+    def test_successful_list_articles_with_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.get(ARTICLE_LIST_URL)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_successful_list_articles_without_token(self):
+        response = self.client.get(ARTICLE_LIST_URL)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
 
 
 class ArticleRetrieveTest(APITestCase):
     # test that article returns if logged in
     # test that article returns if not logged in
+    # test that list does not return a hidden article
     # test returning article that has a <script> or other dangerous tags that bleach does not allow
     pass
 
