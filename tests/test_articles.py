@@ -426,6 +426,8 @@ class ArticleRetrieveTest(APITestCase):
         self.assertIn("slugFull", response.json())
         self.assertIn("user", response.json())
         self.assertIn("articleHtml", response.json())
+        self.assertIn("next", response.json())
+        self.assertIn("prev", response.json())
 
     def test_successful_retrieve_child_article_with_token(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -435,6 +437,8 @@ class ArticleRetrieveTest(APITestCase):
         self.assertIn("slugFull", response.json())
         self.assertIn("user", response.json())
         self.assertIn("articleHtml", response.json())
+        self.assertIn("next", response.json())
+        self.assertIn("prev", response.json())
 
     def test_successful_retrieve_parent_article_without_token(self):
         response = self.client.get(
@@ -446,6 +450,8 @@ class ArticleRetrieveTest(APITestCase):
         self.assertIn("slugFull", response.json())
         self.assertIn("user", response.json())
         self.assertIn("articleHtml", response.json())
+        self.assertIn("next", response.json())
+        self.assertIn("prev", response.json())
 
     def test_successful_retrieve_child_article_without_token(self):
         response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
