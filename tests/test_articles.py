@@ -407,9 +407,9 @@ class ArticleRetrieveTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Create parent.
         self.parent = self.client.post(
-            ARTICLE_CREATE_ROOT_URL, valid_article_payload, format="json"
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload
         ).data
-        # Create child.
+        # Create visible child.
         self.ARTICLE_CREATE_CHILD_URL = (
             f"{API_BASE_URL}/articles/{self.parent['slug_full']}/add-child/"
         )
