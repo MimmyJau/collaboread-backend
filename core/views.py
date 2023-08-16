@@ -130,7 +130,7 @@ class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
-    queryset = Article.objects.all()
+    queryset = Article.objects.all().filter(hidden=False)
     serializer_class = ArticleSerializer
     lookup_field = "slug_full"
 
