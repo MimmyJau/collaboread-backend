@@ -461,7 +461,65 @@ class ArticleRetrieveTest(APITestCase):
         self.assertIn("user", response.json())
         self.assertIn("articleHtml", response.json())
 
-    # test that list does not return a hidden article
+    def test_unsuccessful_retrieve_of_hidden_root_article_without_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        hidden_root = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_hidden_article_payload
+        ).data
+        self.client.credentials()
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_root['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_unsuccessful_retrieve_of_hidden_root_article_with_token_but_not_owner(
+        self,
+    ):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        hidden_root = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_hidden_article_payload
+        ).data
+        self.client.credentials()
+        # Create second user.
+        response = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        another_user_token = response.data["key"]
+        # Login as second user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + another_user_token)
+        # Retrieve hidden root article.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_root['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_unsuccessful_retrieve_of_hidden_child_article_without_token(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create hidden child.
+        hidden_child = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL, valid_hidden_article_payload
+        ).data
+        # Logout.
+        self.client.credentials()
+        # Attempt to get hidden article.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_child['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_unsuccessful_retrieve_of_hidden_child_article_with_token_but_not_owner(
+        self,
+    ):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create hidden child.
+        hidden_child = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL, valid_hidden_article_payload
+        ).data
+        # Logout.
+        self.client.credentials()
+        # Create second user.
+        response = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        another_user_token = response.data["key"]
+        # Login as second user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + another_user_token)
+        # Attempt to get hidden article.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_child['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+
     # test returning article that has a <script> or other dangerous tags that bleach does not allow
     pass
 
