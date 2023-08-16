@@ -409,44 +409,51 @@ class ArticleRetrieveTest(APITestCase):
         self.parent = self.client.post(
             ARTICLE_CREATE_ROOT_URL, valid_article_payload, format="json"
         ).data
-        # test printing out what parent shows here
         # Create child.
-        # self.ARTICLE_CREATE_CHILD_URL = (
-        #     f"{API_BASE_URL}/articles/{self.parent['slug_full']}/add-child/"
-        # )
-        # self.child = self.client.post(
-        #     self.ARTICLE_CREATE_CHILD_URL, valid_article_payload
-        # ).data
+        self.ARTICLE_CREATE_CHILD_URL = (
+            f"{API_BASE_URL}/articles/{self.parent['slug_full']}/add-child/"
+        )
+        self.child = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL, valid_article_payload
+        ).data
         self.client.credentials()
 
-    # test that article returns if not logged in
     def test_successful_retrieve_parent_article_with_token(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        print(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
-        response = self.client.get(
-            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/", format="json"
-        )
-        print(response.data)
-        # self.assertEqual(response.status_code, 200)
-        # self.assertIn("title", response.data)
-        # self.assertIn("slugFull", response.data)
-        # self.assertIn("user", response.data)
-        # self.assertIn("articleHtml", response.data)
-        # self.assertIn("articleJson", response.data)
-        # self.assertIn("articleText", response.data)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("title", response.json())
+        self.assertIn("slugFull", response.json())
+        self.assertIn("user", response.json())
+        self.assertIn("articleHtml", response.json())
 
-    # test that article returns if not logged in
     def test_successful_retrieve_child_article_with_token(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
-        print(response)
-        # self.assertEqual(response.status_code, 200)
-        # self.assertIn("title", response.data)
-        # self.assertIn("slugFull", response.data)
-        # self.assertIn("user", response.data)
-        # self.assertIn("articleHtml", response.data)
-        # self.assertIn("articleJson", response.data)
-        # self.assertIn("articleText", response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("title", response.json())
+        self.assertIn("slugFull", response.json())
+        self.assertIn("user", response.json())
+        self.assertIn("articleHtml", response.json())
+
+    def test_successful_retrieve_parent_article_without_token(self):
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("title", response.json())
+        self.assertIn("slugFull", response.json())
+        self.assertIn("user", response.json())
+        self.assertIn("articleHtml", response.json())
+
+    def test_successful_retrieve_child_article_without_token(self):
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("title", response.json())
+        self.assertIn("slugFull", response.json())
+        self.assertIn("user", response.json())
+        self.assertIn("articleHtml", response.json())
 
     # test that list does not return a hidden article
     # test returning article that has a <script> or other dangerous tags that bleach does not allow
