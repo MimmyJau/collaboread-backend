@@ -520,8 +520,40 @@ class ArticleRetrieveTest(APITestCase):
         response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_child['slug_full']}/")
         self.assertEqual(response.status_code, 404)
 
+    def test_successful_retreive_of_hidden_root_article_as_owner(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create hidden root.
+        hidden_root = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_hidden_article_payload
+        ).data
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_root['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("title", response.json())
+        self.assertIn("slugFull", response.json())
+        self.assertIn("user", response.json())
+        self.assertIn("articleHtml", response.json())
+        self.assertIn("next", response.json())
+        self.assertIn("prev", response.json())
+
+    def test_successful_retreive_of_hidden_child_article_as_owner(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create hidden child.
+        hidden_child = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL, valid_hidden_article_payload
+        ).data
+        # Attempt to get hidden article.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{hidden_child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("title", response.json())
+        self.assertIn("slugFull", response.json())
+        self.assertIn("user", response.json())
+        self.assertIn("articleHtml", response.json())
+        self.assertIn("next", response.json())
+        self.assertIn("prev", response.json())
+
     # test returning article that has a <script> or other dangerous tags that bleach does not allow
-    pass
 
 
 class ArticleUpdateTest(APITestCase):
