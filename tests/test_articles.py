@@ -137,7 +137,7 @@ class ArticleCreateRootTest(APITestCase):
         self.assertEqual(response_2.status_code, 201)
         self.assertNotEqual(response_1.data["slug_full"], response_2.data["slug_full"])
         self.assertEqual(
-            response_1.data["slug_full"] + "-1", response_2.data["slug_full"]
+            response_1.data["slug_full"] + "-2", response_2.data["slug_full"]
         )
 
     # test adding 10 articles with the same now, do they all come back with different slugs?
@@ -312,7 +312,7 @@ class ArticleCreateChildTest(APITestCase):
         self.assertEqual(response_2.status_code, 201)
         self.assertNotEqual(response_1.data["slug_full"], response_2.data["slug_full"])
         self.assertEqual(
-            response_1.data["slug_full"] + "-1", response_2.data["slug_full"]
+            response_1.data["slug_full"] + "-2", response_2.data["slug_full"]
         )
 
     # test adding 10 articles with the same now, do they all come back with different slugs?

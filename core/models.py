@@ -109,7 +109,7 @@ class Article(MP_Node):
     def update_slug(self):
         slug = slugify(self.title, max_length=50)
         siblings = self.get_siblings().exclude(uuid=self.uuid)
-        count = 1
+        count = 2
         while True:
             # Don't use `if results is not None:` because that will check
             # for None explicitly, which an empty queryset is not.
