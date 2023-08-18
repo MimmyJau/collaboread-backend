@@ -204,7 +204,6 @@ class AnnotationRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIVi
     lookup_field = "uuid"
 
     def update(self, request, *args, **kwargs):
-        """Temp conditional until we add auth"""
         request.data["user"] = request.user
         return super().update(request, *args, **kwargs)
 
