@@ -106,21 +106,9 @@ class Article(MP_Node):
             return parent_slugs
         return [str(self.uuid)]
 
-    @classmethod
-    def get_slug(cls, title, parent_path=None):
-        # Use .get() in case slug field doesn't exist.
-        # If slug doesn't exist, generate one.
-        if not title:
-            return ""
-        slug = slugify(title, max_length=50)
-        # Check if there are siblings with the same slug.
-        if parent_path is not None:
-            # This branch if node being inserted is not the root.
-            parent = Article.objects.get(slug_full=parent_path)
-            siblings = parent.get_children()
-        else:
-            # This branch if node being inserted is a root.
-            siblings = cls.get_root_nodes()
+    def update_slug(self):
+        slug = slugify(self.title, max_length=50)
+        siblings = self.get_siblings().exclude(uuid=self.uuid)
         count = 1
         while True:
             # Don't use `if results is not None:` because that will check
@@ -131,54 +119,39 @@ class Article(MP_Node):
                 break
             slug = f"{slug}-{count}"
             count += 1
-        return slug
+        self.slug_section = slug
 
-    @classmethod
-    def get_path(cls, slug, parent_path=None):
-        if parent_path is None:
-            return slug
-        parent = Article.objects.get(slug_full=parent_path)
-        return parent.slug_full + "/" + slug
+    def update_path(self):
+        if self.is_root():
+            self.slug_full = self.slug_section
+            return
+        parent = self.get_parent()
+        self.slug_full = parent.slug_full + "/" + self.slug_section
 
     @classmethod
     def create_root(cls, **data):
-        data["slug_section"] = cls.get_slug(data["title"], None)
-        data["slug_full"] = cls.get_path(data["slug_section"], None)
         return cls.add_root(**data)
 
     @classmethod
     def create_child(cls, parent_path, **data):
         # TODO throw error if parent does not exist
         parent = Article.objects.get(slug_full=parent_path)
-        data["slug_section"] = cls.get_slug(data["title"], parent_path)
-        data["slug_full"] = cls.get_path(data["slug_section"], parent_path)
         return parent.add_child(**data)
 
-    # Who is even calling this method?
-    # Seems to be used in migrations....
     def save(self, *args, **kwargs):
-        """Override save method to generate slugs."""
-        # Generate section slug if it doesn't already exist
-        if not self.slug_section:
-            self.slug_section = slugify(self.title, max_length=50)
-        # Check that section slug is unique among siblings
-        for sibling in self.get_siblings():
-            # .get_siblings() includes self, so skip
-            if sibling.uuid == self.uuid:
-                continue
-            if sibling.slug_section == self.slug_section:
-                self.slug_section += "-"
-        # Now generate full slug, but first save current slug
-        # so we can compare later and update children if necessary
-        prev_slug_full = self.slug_full
-        if self.is_root():
-            self.slug_full = self.slug_section
-        else:
-            self.slug_full = self.get_parent().slug_full + "/" + self.slug_section
+        """
+        This method is called by .add_root(), .add_child(), and .update().
+        """
+        self.update_slug()
+        self.update_path()
         super().save(*args, **kwargs)
-        # If new slug is not the same as old slug, update all children
-        if self.slug_full != prev_slug_full:
-            for child in self.get_children():
+        children = self.get_children()
+        if not children:
+            return
+        for child in children:
+            # if child's path != parent's path + child's slug
+            # then update child's path
+            if child.slug_full != self.slug_full + "/" + child.slug_section:
                 child.save()
 
     def __str__(self):
