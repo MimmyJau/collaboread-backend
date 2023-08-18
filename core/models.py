@@ -107,12 +107,12 @@ class Article(MP_Node):
         return [str(self.uuid)]
 
     @classmethod
-    def get_slug(cls, parent_path=None, **data):
+    def get_slug(cls, title, parent_path=None):
         # Use .get() in case slug field doesn't exist.
-        slug = data.get("slug_section", None)
         # If slug doesn't exist, generate one.
-        if slug is None:
-            slug = slugify(data["title"], max_length=50)
+        if not title:
+            return ""
+        slug = slugify(title, max_length=50)
         # Check if there are siblings with the same slug.
         if parent_path is not None:
             # This branch if node being inserted is not the root.
@@ -128,7 +128,6 @@ class Article(MP_Node):
             # on the other hand, an empty queryset is falsey.
             filtered_siblings = siblings.filter(slug_section=slug)
             if not filtered_siblings:
-                data["slug_section"] = slug
                 break
             slug = f"{slug}-{count}"
             count += 1
@@ -143,7 +142,7 @@ class Article(MP_Node):
 
     @classmethod
     def create_root(cls, **data):
-        data["slug_section"] = cls.get_slug(None, **data)
+        data["slug_section"] = cls.get_slug(data["title"], None)
         data["slug_full"] = cls.get_path(data["slug_section"], None)
         return cls.add_root(**data)
 
@@ -151,7 +150,7 @@ class Article(MP_Node):
     def create_child(cls, parent_path, **data):
         # TODO throw error if parent does not exist
         parent = Article.objects.get(slug_full=parent_path)
-        data["slug_section"] = cls.get_slug(parent_path, **data)
+        data["slug_section"] = cls.get_slug(data["title"], parent_path)
         data["slug_full"] = cls.get_path(data["slug_section"], parent_path)
         return parent.add_child(**data)
 
