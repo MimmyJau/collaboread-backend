@@ -130,9 +130,17 @@ class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOrReadOnly]
 
-    queryset = Article.objects.all().filter(hidden=False)
+    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     lookup_field = "slug_full"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.user.is_authenticated:
+            qs = qs.filter(Q(hidden=False) | Q(user=self.request.user))
+        else:
+            qs = qs.filter(hidden=False)
+        return qs
 
     def update(self, request, *args, **kwargs):
         request.data["user"] = request.user
