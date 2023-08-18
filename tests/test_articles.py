@@ -36,6 +36,15 @@ valid_article_payload = {
     "hidden": False,
 }
 
+valid_update_article_payload = {
+    "title": "New Article",
+    "articleHtml": "<p>This is a new article</p>",
+    "articleJson": "{}",
+    "articleText": "This is a new article",
+    "hidden": False,
+}
+
+
 valid_hidden_article_payload = {
     "title": "Test Article",
     "articleHtml": "<p>This is a test article</p>",
@@ -557,7 +566,50 @@ class ArticleRetrieveTest(APITestCase):
 
 
 class ArticleUpdateTest(APITestCase):
-    pass
+    def setUp(self):
+        # Create user.
+        response = self.client.post(REGISTRATION_URL, valid_user_payload)
+        self.token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create parent.
+        self.parent = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload
+        ).data
+        # Create visible child.
+        self.ARTICLE_CREATE_CHILD_URL = (
+            f"{API_BASE_URL}/articles/{self.parent['slug_full']}/add-child/"
+        )
+        self.child = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL, valid_article_payload
+        ).data
+        self.client.credentials()
+
+    # test successful update own root article (any of the fields)
+    def test_successful_update_of_own_root_article(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/",
+            valid_update_article_payload,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["title"], "New Article")
+        # Important to check that update changes slug / path
+        self.assertEqual(response.json()["slugSection"], "new-article")
+        self.assertEqual(response.json()["slugFull"], "new-article")
+        # Check that child's path also changed.
+        child = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(child.status_code, 200)
+        self.assertEqual(child.json()["slugSection"], "test-article")
+        self.assertEqual(child.json()["slugFull"], "new-article/test-article")
+
+    # test successful update own child article (any of the fields)
+    # test unsuccessful update if article doesn't exist
+    # test unsuccessful update of article that does not belong to user
+    # test unsuccessful update if not logged in
+
+    # TODO: test successful move node to root and that all of its children slugs update prooperly
 
 
 class ArticleDeleteTest(APITestCase):
