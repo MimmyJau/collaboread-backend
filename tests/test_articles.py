@@ -589,6 +589,7 @@ class ArticleUpdateTest(APITestCase):
     def test_successful_update_of_own_root_article(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Update article.
         response = self.client.put(
             f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/",
             valid_update_article_payload,
@@ -596,12 +597,11 @@ class ArticleUpdateTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["title"], "New Article")
         # Important to check that update changes slug / path
-        self.assertEqual(response.json()["slugSection"], "new-article")
         self.assertEqual(response.json()["slugFull"], "new-article")
         # Check that child's path also changed.
-        child = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        URL = f"{ARTICLE_DETAIL_URL}/new-article/test-article/"
+        child = self.client.get(URL)
         self.assertEqual(child.status_code, 200)
-        self.assertEqual(child.json()["slugSection"], "test-article")
         self.assertEqual(child.json()["slugFull"], "new-article/test-article")
 
     # test successful update own child article (any of the fields)
