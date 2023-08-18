@@ -117,20 +117,20 @@ class Article(MP_Node):
         if parent_path is not None:
             # This branch if node being inserted is not the root.
             parent = Article.objects.get(slug_full=parent_path)
-            results = parent.get_children().filter(slug_section=slug)
+            siblings = parent.get_children()
         else:
             # This branch if node being inserted is a root.
-            results = cls.get_root_nodes().filter(slug_section=slug)
+            siblings = cls.get_root_nodes()
         count = 1
         while True:
             # Don't use `if results is not None:` because that will check
             # for None explicitly, which an empty queryset is not.
             # on the other hand, an empty queryset is falsey.
-            if not results:
+            filtered_siblings = siblings.filter(slug_section=slug)
+            if not filtered_siblings:
                 data["slug_section"] = slug
                 break
             slug = f"{slug}-{count}"
-            results = cls.get_root_nodes().filter(slug_section=slug)
             count += 1
         return slug
 
