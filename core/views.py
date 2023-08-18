@@ -136,6 +136,7 @@ class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        # Shouldn't return any hidden articles unless they belong to user.
         if self.request.user.is_authenticated:
             qs = qs.filter(Q(hidden=False) | Q(user=self.request.user))
         else:
