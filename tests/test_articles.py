@@ -618,7 +618,7 @@ class ArticleUpdateTest(APITestCase):
         )
 
     # test successful update own child article (any of the fields)
-    def test_successful_update_of_child_article(self):
+    def test_successful_update_of_own_child_article(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Update article.
