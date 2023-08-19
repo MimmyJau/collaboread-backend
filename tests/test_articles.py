@@ -587,7 +587,9 @@ class ArticleUpdateTest(APITestCase):
         self.ARTICLE_CREATE_GRANDCHILD_URL = (
             f"{API_BASE_URL}/articles/{self.child['slug_full']}/add-child/"
         )
-        self.client.post(self.ARTICLE_CREATE_GRANDCHILD_URL, valid_article_payload).data
+        self.grandchild = self.client.post(
+            self.ARTICLE_CREATE_GRANDCHILD_URL, valid_article_payload
+        ).data
         self.client.credentials()
 
     def test_successful_update_of_own_root_article(self):
@@ -636,12 +638,103 @@ class ArticleUpdateTest(APITestCase):
             grandchild.json()["slugFull"], "test-article/new-article/test-article"
         )
 
-    # test making an article hidden
-    # test unsuccessful update if article doesn't exist
-    # test unsuccessful update of article that does not belong to user
-    # test unsuccessful update if not logged in
+    def test_unsuccesful_update_of_non_existent_article(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Update article.
+        response_from_put = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/non-existent-article/",
+            valid_update_article_payload,
+        )
+        self.assertEqual(response_from_put.status_code, 404)
+        response_from_get = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/non-existent-article/",
+        )
+        self.assertEqual(response_from_get.status_code, 404)
 
-    # TODO: test successful move node to root and that all of its children slugs update prooperly
+    def test_unsuccessful_update_of_root_article_by_user_that_is_not_owner(self):
+        # Register new user.
+        response = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        second_token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + second_token)
+        # Update article.
+        response = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/",
+            valid_update_article_payload,
+        )
+        self.assertEqual(response.status_code, 403)
+        # Get article just to make sure.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["slugFull"], "test-article")
+
+    def test_unsuccessful_update_of_child_article_by_user_that_is_not_owner(self):
+        # Register new user.
+        response = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        second_token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + second_token)
+        # Update article.
+        response = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/",
+            valid_update_article_payload,
+        )
+        self.assertEqual(response.status_code, 403)
+        # Get root article just to make sure.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["slugFull"], "test-article")
+        # Get child article just to make sure.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["slugFull"], "test-article/test-article")
+        # Get grandchild article just to make sure.
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["slugFull"], "test-article/test-article/test-article"
+        )
+
+    # test unsuccessful update if not logged in
+    def test_unsuccessful_update_of_root_article_if_not_logged_in(self):
+        response = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/",
+            valid_update_article_payload,
+        )
+        self.assertEqual(response.status_code, 401)
+        # Get article just to make sure.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["slugFull"], "test-article")
+
+    def test_unsuccessful_update_of_child_article_if_not_logged_in(self):
+        response = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/",
+            valid_update_article_payload,
+        )
+        self.assertEqual(response.status_code, 401)
+        # Get root article just to make sure.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["slugFull"], "test-article")
+        # Get child article just to make sure.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["slugFull"], "test-article/test-article")
+        # Get grandchild article just to make sure.
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["slugFull"], "test-article/test-article/test-article"
+        )
+
+    # test making an article hidden
+    # test successful move node to root and that all of its children slugs update prooperly
 
 
 class ArticleDeleteTest(APITestCase):
