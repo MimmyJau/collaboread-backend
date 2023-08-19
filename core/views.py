@@ -59,7 +59,6 @@ class ArticleCreateRootAPIView(generics.CreateAPIView):
         Instead, we pass the newly created instance to .to_representation() in the
         same way a GET request would.
         """
-        request.data["user"] = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = self.perform_create(serializer)
@@ -71,7 +70,7 @@ class ArticleCreateRootAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         """We override this method to use MP_Node's API."""
-        return Article.create_root(**serializer.validated_data)
+        return Article.create_root(**serializer.validated_data, user=self.request.user)
 
 
 article_create_root_view = ArticleCreateRootAPIView.as_view()
@@ -94,7 +93,6 @@ class ArticleCreateChildAPIView(generics.CreateAPIView):
         Instead, we pass the newly created instance to .to_representation() in the
         same way a GET request would.
         """
-        request.data["user"] = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = self.perform_create(serializer)
@@ -108,7 +106,9 @@ class ArticleCreateChildAPIView(generics.CreateAPIView):
         """We override this method to use MP_Node's API."""
         try:
             return Article.create_child(
-                self.kwargs["parent_path"], **serializer.validated_data
+                self.kwargs["parent_path"],
+                **serializer.validated_data,
+                user=self.request.user
             )
         except Article.DoesNotExist:
             raise NotFound(detail="Parent article not found.", code=404)
@@ -143,9 +143,8 @@ class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
             qs = qs.filter(hidden=False)
         return qs
 
-    def update(self, request, *args, **kwargs):
-        request.data["user"] = request.user
-        return super().update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 article_retrieve_update_view = ArticleRetrieveUpdateAPIView.as_view()

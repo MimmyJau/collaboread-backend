@@ -68,10 +68,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for individual Article objects."""
 
-    user = serializers.SlugRelatedField(
-        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
-    )
-    # article_html = serializers.SerializerMethodField(method_name="get_article_html")
+    user = serializers.SlugRelatedField(read_only=True, slug_field="username")
     prev = serializers.SerializerMethodField(method_name="get_prev")
     next = serializers.SerializerMethodField(method_name="get_next")
 
