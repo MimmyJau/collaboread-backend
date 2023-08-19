@@ -124,7 +124,7 @@ class ArticleCreateSiblingAPIView(generics.CreateAPIView):
 article_create_sibling_view = ArticleCreateSiblingAPIView.as_view()
 
 
-class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class ArticleRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     """View one article"""
 
     authentication_classes = [TokenAuthentication]
@@ -147,7 +147,7 @@ class ArticleRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         serializer.save(user=self.request.user)
 
 
-article_retrieve_update_view = ArticleRetrieveUpdateAPIView.as_view()
+article_retrieve_update_destroy_view = ArticleRetrieveUpdateDestroyAPIView.as_view()
 
 
 class TableOfContentsRetrieveView(generics.RetrieveAPIView):
