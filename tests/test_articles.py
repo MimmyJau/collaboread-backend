@@ -772,24 +772,134 @@ class ArticleDeleteTest(APITestCase):
             f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/"
         )
         self.assertEqual(response.status_code, 204)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_successful_delete_of_child_article_by_owner(self):
-        pass
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 204)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_successful_delete_of_grandchild_article_by_owner(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 204)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_unsuccessful_delete_of_non_existent_article_by_user(self):
-        pass
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.delete(f"{ARTICLE_DETAIL_URL}/non-existent-article/")
+        self.assertEqual(response.status_code, 404)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_unsuccessful_delete_of_root_article_by_non_owner(self):
-        pass
+        # Register new user.
+        response = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        second_token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + second_token)
+        # Attempt to delete
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 403)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_unsuccessful_delete_of_child_article_by_non_owner(self):
-        pass
+        # Register new user.
+        response = self.client.post(REGISTRATION_URL, valid_second_user_payload)
+        second_token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + second_token)
+        # Attempt to delete
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 403)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_unsuccessful_delete_of_root_article_by_non_authenticated_user(self):
-        pass
+        # Attempt to delete
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 401)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_unsuccessful_delete_of_child_article_by_non_authenticated_user(self):
-        pass
-
-    def test_unsuccessful_delete_of_child_article_by_non_owner(self):
-        pass
+        # Attempt to delete
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 401)
+        # Double parent is still there.
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            f"{ARTICLE_DETAIL_URL}/{self.grandchild['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 200)
