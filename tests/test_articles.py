@@ -590,7 +590,6 @@ class ArticleUpdateTest(APITestCase):
         self.client.post(self.ARTICLE_CREATE_GRANDCHILD_URL, valid_article_payload).data
         self.client.credentials()
 
-    # test successful update own root article (any of the fields)
     def test_successful_update_of_own_root_article(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
@@ -617,8 +616,27 @@ class ArticleUpdateTest(APITestCase):
         )
 
     # test successful update own child article (any of the fields)
-    # def test_successful_update
+    def test_successful_update_of_child_article(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Update article.
+        child = self.client.put(
+            f"{ARTICLE_DETAIL_URL}/{self.child['slug_full']}/",
+            valid_update_article_payload,
+        )
+        child = self.client.get(f"{ARTICLE_DETAIL_URL}/test-article/new-article/")
+        self.assertEqual(child.status_code, 200)
+        self.assertEqual(child.json()["title"], "New Article")
+        self.assertEqual(child.json()["slugFull"], "test-article/new-article")
+        # Check that grandchild's path also changed.
+        URL = f"{ARTICLE_DETAIL_URL}/test-article/new-article/test-article/"
+        grandchild = self.client.get(URL)
+        self.assertEqual(grandchild.status_code, 200)
+        self.assertEqual(
+            grandchild.json()["slugFull"], "test-article/new-article/test-article"
+        )
 
+    # test making an article hidden
     # test unsuccessful update if article doesn't exist
     # test unsuccessful update of article that does not belong to user
     # test unsuccessful update if not logged in
