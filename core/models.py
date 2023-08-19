@@ -93,7 +93,8 @@ class Article(MP_Node):
         except ObjectDoesNotExist:
             return None
 
-    # Don't think this is used anywhere
+    # Don't think this is used anywhere except in migrations.
+    # So maybe keep until we've pushed migrations to production.
     @property
     def slugs(self):
         """Get list of slugs of ancestor node."""
@@ -107,14 +108,19 @@ class Article(MP_Node):
         return [str(self.uuid)]
 
     def update_slug(self):
+        """
+        Most of the logic here is to verify that slug is unique among siblings.
+        For example, if slug is "chapter", and there already exists another "chapter",
+        then we'll append a number to it. So the new slug will be "chapter-2".
+        """
         slug = slugify(self.title, max_length=50)
         siblings = self.get_siblings().exclude(uuid=self.uuid)
         count = 2
         while True:
-            # Don't use `if results is not None:` because that will check
+            filtered_siblings = siblings.filter(slug_section=slug)
+            # Don't use `if filtered_siblings is not None:` because that will check
             # for None explicitly, which an empty queryset is not.
             # on the other hand, an empty queryset is falsey.
-            filtered_siblings = siblings.filter(slug_section=slug)
             if not filtered_siblings:
                 break
             slug = f"{slug}-{count}"
@@ -122,6 +128,7 @@ class Article(MP_Node):
         self.slug_section = slug
 
     def update_path(self):
+        """Update path of node."""
         if self.is_root():
             self.slug_full = self.slug_section
             return
@@ -141,16 +148,18 @@ class Article(MP_Node):
     def save(self, *args, **kwargs):
         """
         This method is called by .add_root(), .add_child(), and .update().
+        We override this method so that slugs are properly updated whenever we save a node.
         """
+        # Update and save this node.
         self.update_slug()
         self.update_path()
         super().save(*args, **kwargs)
+
+        # Check if the node's children need to be updated.
         children = self.get_children()
         if not children:
             return
         for child in children:
-            # if child's path != parent's path + child's slug
-            # then update child's path
             if child.slug_full != self.slug_full + "/" + child.slug_section:
                 child.save()
 
