@@ -733,9 +733,63 @@ class ArticleUpdateTest(APITestCase):
             response.json()["slugFull"], "test-article/test-article/test-article"
         )
 
+    # test making update with invalid data
     # test making an article hidden
     # test successful move node to root and that all of its children slugs update prooperly
 
 
 class ArticleDeleteTest(APITestCase):
-    pass
+    def setUp(self):
+        # Create user.
+        response = self.client.post(REGISTRATION_URL, valid_user_payload)
+        self.token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create parent.
+        self.parent = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload
+        ).data
+        # Create visible child.
+        self.ARTICLE_CREATE_CHILD_URL = (
+            f"{API_BASE_URL}/articles/{self.parent['slug_full']}/add-child/"
+        )
+        self.child = self.client.post(
+            self.ARTICLE_CREATE_CHILD_URL, valid_article_payload
+        ).data
+        # Create grandchild.
+        self.ARTICLE_CREATE_GRANDCHILD_URL = (
+            f"{API_BASE_URL}/articles/{self.child['slug_full']}/add-child/"
+        )
+        self.grandchild = self.client.post(
+            self.ARTICLE_CREATE_GRANDCHILD_URL, valid_article_payload
+        ).data
+        self.client.credentials()
+
+    def test_successful_delete_of_root_article_by_owner(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        response = self.client.delete(
+            f"{ARTICLE_DETAIL_URL}/{self.parent['slug_full']}/"
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_successful_delete_of_child_article_by_owner(self):
+        pass
+
+    def test_unsuccessful_delete_of_non_existent_article_by_user(self):
+        pass
+
+    def test_unsuccessful_delete_of_root_article_by_non_owner(self):
+        pass
+
+    def test_unsuccessful_delete_of_child_article_by_non_owner(self):
+        pass
+
+    def test_unsuccessful_delete_of_root_article_by_non_authenticated_user(self):
+        pass
+
+    def test_unsuccessful_delete_of_child_article_by_non_authenticated_user(self):
+        pass
+
+    def test_unsuccessful_delete_of_child_article_by_non_owner(self):
+        pass
