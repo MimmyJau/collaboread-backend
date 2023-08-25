@@ -284,6 +284,7 @@ class BookmarkRetrieveUpdateAPIView(
 
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
+    lookup_field = "book"
 
     def get_object(self):
         queryset = self.get_queryset()
@@ -293,6 +294,14 @@ class BookmarkRetrieveUpdateAPIView(
         obj = get_object_or_404(queryset)  # Lookup the object
         self.check_object_permissions(self.request, obj)
         return obj
+
+    def perform_create(self, serializer):
+        extra_kwargs = {}
+        book = Article.objects.get(slug_full=self.kwargs.get("book"))
+        if not book:
+            raise NotFound(detail="Book not found.", code=404)
+        extra_kwargs["book"] = book
+        serializer.save(**extra_kwargs)
 
     def update(self, request, *args, **kwargs):
         request.data["user"] = request.user

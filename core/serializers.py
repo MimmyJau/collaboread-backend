@@ -259,7 +259,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "highlight_start",
             "highlight_end",
         ]
-        read_only = ["uuid", "created_on", "updated_on"]
+        read_only_fields = ["uuid", "book", "created_on", "updated_on"]
 
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
@@ -267,9 +267,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
     )
-    book = serializers.SlugRelatedField(
-        queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
-    )
+    book = serializers.SlugRelatedField(read_only=True, slug_field="slug_full")
 
     def validate(self, attrs):
         """Ensure highlight contains at least one character"""
