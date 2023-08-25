@@ -1,6 +1,7 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.request import clone_request
 
@@ -22,15 +23,21 @@ class AllowPUTAsCreateMixin:
         serializer.is_valid(raise_exception=True)
 
         if instance is None:
-            extra_kwargs = {}
-            # lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-            # lookup_value = self.kwargs[lookup_url_kwarg]
-            # extra_kwargs = {self.lookup_field: lookup_value}
-            serializer.save(**extra_kwargs)
+            self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        serializer.save()
+        self.perform_update(serializer)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        extra_kwargs = {}
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        lookup_value = self.kwargs[lookup_url_kwarg]
+        extra_kwargs = {self.lookup_field: lookup_value}
+        serializer.save(**extra_kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save()
 
     def partial_update(self, request, *args, **kwargs):
         kwargs["partial"] = True
