@@ -12,6 +12,7 @@ ARTICLE_LIST_URL = f"{API_BASE_URL}/articles/"
 ARTICLE_DETAIL_URL = f"{API_BASE_URL}/articles"
 
 BOOKMARK_CREATE_URL = f"{API_BASE_URL}/bookmarks/"
+BOOKMARK_DETAIL_URL = f"{API_BASE_URL}/bookmark"
 
 valid_user_payload = {
     "username": "testuser",
@@ -32,6 +33,14 @@ valid_article_payload = {
     "articleHtml": "<p>This is a test article</p>",
     "articleJson": "{}",
     "articleText": "This is a test article",
+    "hidden": False,
+}
+
+valid_article_payload_2 = {
+    "title": "Another Article",
+    "articleHtml": "<p>This is a another article</p>",
+    "articleJson": "{}",
+    "articleText": "This is a another article",
     "hidden": False,
 }
 
@@ -64,7 +73,7 @@ class BookmarkCreateTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Create article.
         response = self.client.post(ARTICLE_CREATE_ROOT_URL, valid_article_payload)
-        self.article_path = response.data["slug_full"]
+        self.book_path = response.data["slug_full"]
         # Logout.
         self.client.credentials()
 
@@ -72,13 +81,13 @@ class BookmarkCreateTest(APITestCase):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Create bookmark.
-        valid_bookmark_payload = generate_bookmark_payload(self.article_path, 5)
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
         response = self.client.post(BOOKMARK_CREATE_URL, valid_bookmark_payload)
         self.assertEqual(response.status_code, 405)
 
     def test_unsuccessful_bookmark_create_by_nonuser(self):
         # Create bookmark.
-        valid_bookmark_payload = generate_bookmark_payload(self.article_path, 5)
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
         response = self.client.post(BOOKMARK_CREATE_URL, valid_bookmark_payload)
         self.assertEqual(response.status_code, 405)
 
@@ -91,10 +100,18 @@ class BookmarkUpdateTest(APITestCase):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Create article.
-        response = self.client.post(ARTICLE_CREATE_ROOT_URL, valid_article_payload)
-        self.article_path = response.data["slug_full"]
-        # Set URL path
-        self.BOOKMARK_UPDATE_URL = f"{API_BASE_URL}/bookmark/{self.article_path}/"
+        self.book = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload
+        ).data
+        self.book_path = self.book["slug_full"]
+        # Create child article.
+        self.child = self.client.post(
+            f"{API_BASE_URL}/articles/{self.book_path}/add-child/",
+            valid_article_payload_2,
+        ).data
+        self.child_path = self.child["slug_full"]
+        # Set URL path.
+        self.BOOKMARK_UPDATE_URL = f"{API_BASE_URL}/bookmark/{self.book_path}/"
         # Logout.
         self.client.credentials()
 
@@ -102,17 +119,40 @@ class BookmarkUpdateTest(APITestCase):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # PUTAsCreate bookmark.
-        valid_bookmark_payload = generate_bookmark_payload(self.article_path, 5)
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
         response = self.client.put(
             self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
         )
-        print(response.data)
         self.assertEqual(response.status_code, 201)
-
-        pass
+        self.assertIn("book", response.data)
+        self.assertIn("article", response.data)
+        self.assertIn("highlight", response.data)
 
     def test_successful_bookmark_update_by_user(self):
-        pass
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # PUTAsCreate bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("book", response.data)
+        self.assertIn("article", response.data)
+        self.assertIn("highlight", response.data)
+        # Update bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.child_path, 5)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("book", response.data)
+        self.assertIn("article", response.data)
+        self.assertIn("highlight", response.data)
+        # Retrieve and check only one exists.
+        response = self.client.get(f"{BOOKMARK_DETAIL_URL}/{self.book_path}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["article"], "test-article/another-article")
 
     def test_unsuccessful_bookmark_update_by_another_user(self):
         pass
