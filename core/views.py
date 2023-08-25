@@ -260,7 +260,7 @@ class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_view()
 
 
-class BookmarkCreateAPIView(generics.CreateAPIView):
+class BookmarkListAPIView(generics.ListAPIView):
     """List and create Bookmarks"""
 
     serializer_class = BookmarkSerializer
@@ -268,13 +268,8 @@ class BookmarkCreateAPIView(generics.CreateAPIView):
     def get_queryset(self):
         return Bookmark.objects.filter(user=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        print(request.user)
-        request.data["user"] = request.user
-        return super().create(request, *args, **kwargs)
 
-
-bookmark_create_view = BookmarkCreateAPIView.as_view()
+bookmark_list_view = BookmarkListAPIView.as_view()
 
 
 class BookmarkRetrieveUpdateAPIView(
