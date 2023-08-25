@@ -259,11 +259,9 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "highlight_start",
             "highlight_end",
         ]
-        read_only_fields = ["uuid", "book", "created_on", "updated_on"]
+        read_only_fields = ["uuid", "user", "book", "created_on", "updated_on"]
 
-    user = serializers.SlugRelatedField(
-        queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
-    )
+    user = serializers.SlugRelatedField(read_only=True, slug_field="username")
     article = serializers.SlugRelatedField(
         queryset=Article.objects.all(), read_only=False, slug_field="slug_full"
     )

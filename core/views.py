@@ -301,11 +301,10 @@ class BookmarkRetrieveUpdateAPIView(
         if not book:
             raise NotFound(detail="Book not found.", code=404)
         extra_kwargs["book"] = book
-        serializer.save(**extra_kwargs)
+        serializer.save(user=self.request.user, **extra_kwargs)
 
-    def update(self, request, *args, **kwargs):
-        request.data["user"] = request.user
-        return super().update(request, *args, **kwargs)
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 bookmark_retrieve_update_view = BookmarkRetrieveUpdateAPIView.as_view()
