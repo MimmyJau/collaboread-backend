@@ -89,7 +89,7 @@ class BookmarkCreateTest(APITestCase):
         # Create bookmark.
         valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
         response = self.client.post(BOOKMARK_CREATE_URL, valid_bookmark_payload)
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 401)
 
 
 class BookmarkUpdateTest(APITestCase):
