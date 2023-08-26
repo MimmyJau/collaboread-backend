@@ -160,8 +160,61 @@ class BookmarkUpdateTest(APITestCase):
         self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 9)
         self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 9)
 
-    def test_unsuccessful_bookmark_update_by_another_user(self):
-        pass
+    def test_successful_bookmark_using_non_root_article(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        NON_ROOT_URL = f"{BOOKMARK_DETAIL_URL}/{self.child_path}/"
+        response = self.client.put(NON_ROOT_URL, valid_bookmark_payload, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 5)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 5)
+
+    def test_successful_bookmark_by_another_user_has_no_effect_on_first_bookmark(
+        self,
+    ):
+        # Login as first user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 5)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 5)
+        # Logout.
+        self.client.credentials()
+        # Create second user and store token.
+        response_user_2 = self.client.post(REGISTRATION_URL, valid_user_payload_2)
+        self.token_2 = response_user_2.data["key"]
+        # Login as second user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token_2)
+        # Create second bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.child_path, 9)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article/another-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 9)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 9)
+        # Logout.
+        self.client.credentials()
+        # Login as first user (again).
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Retrieve and check only one exists.  response = self.client.get(f"{BOOKMARK_DETAIL_URL}/{self.book_path}/")
+        response = self.client.get(f"{BOOKMARK_DETAIL_URL}/{self.book_path}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 5)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 5)
 
     def test_unsuccessful_bookmark_update_by_nonuser(self):
         pass
