@@ -297,9 +297,11 @@ class BookmarkRetrieveUpdateAPIView(
 
     def perform_create(self, serializer):
         extra_kwargs = {}
-        book = Article.objects.get(slug_full=self.kwargs.get("book"))
-        if not book:
+        article = Article.objects.get(slug_full=self.kwargs.get("book"))
+        if not article:
             raise NotFound(detail="Book not found.", code=404)
+        # Important that we identify a bookmark by its root (not a specific chapter)
+        book = article.get_root()
         extra_kwargs["book"] = book
         serializer.save(user=self.request.user, **extra_kwargs)
 
