@@ -111,7 +111,7 @@ class BookmarkUpdateTest(APITestCase):
         ).data
         self.child_path = self.child["slug_full"]
         # Set URL path.
-        self.BOOKMARK_UPDATE_URL = f"{API_BASE_URL}/bookmark/{self.book_path}/"
+        self.BOOKMARK_UPDATE_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
         # Logout.
         self.client.credentials()
 
