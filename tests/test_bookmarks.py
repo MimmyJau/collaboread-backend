@@ -21,7 +21,7 @@ valid_user_payload = {
     "password2": "testpassword",
 }
 
-valid_second_user_payload = {
+valid_user_payload_2 = {
     "username": "anotheruser",
     "email": "another@email.com",
     "password1": "testpassword",
@@ -124,9 +124,10 @@ class BookmarkUpdateTest(APITestCase):
             self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
         )
         self.assertEqual(response.status_code, 201)
-        self.assertIn("book", response.data)
-        self.assertIn("article", response.data)
-        self.assertIn("highlight", response.data)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 5)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 5)
 
     def test_successful_bookmark_update_by_user(self):
         # Login.
@@ -137,22 +138,27 @@ class BookmarkUpdateTest(APITestCase):
             self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
         )
         self.assertEqual(response.status_code, 201)
-        self.assertIn("book", response.data)
-        self.assertIn("article", response.data)
-        self.assertIn("highlight", response.data)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 5)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 5)
         # Update bookmark.
-        valid_bookmark_payload = generate_bookmark_payload(self.child_path, 5)
+        valid_bookmark_payload = generate_bookmark_payload(self.child_path, 9)
         response = self.client.put(
             self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("book", response.data)
-        self.assertIn("article", response.data)
-        self.assertIn("highlight", response.data)
+        self.assertEqual(response.data["book"], "test-article")
+        self.assertEqual(response.data["article"], "test-article/another-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 9)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 9)
         # Retrieve and check only one exists.
         response = self.client.get(f"{BOOKMARK_DETAIL_URL}/{self.book_path}/")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["book"], "test-article")
         self.assertEqual(response.data["article"], "test-article/another-article")
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["start"], 9)
+        self.assertEqual(response.data["highlight"][0]["characterRange"]["end"], 9)
 
     def test_unsuccessful_bookmark_update_by_another_user(self):
         pass
