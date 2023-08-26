@@ -263,6 +263,9 @@ comment_retrieve_update_destroy_view = CommentRetrieveUpdateDestroyAPIView.as_vi
 class BookmarkListAPIView(generics.ListAPIView):
     """List and create Bookmarks"""
 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     serializer_class = BookmarkSerializer
 
     def get_queryset(self):
@@ -279,7 +282,7 @@ class BookmarkRetrieveUpdateAPIView(
 
     # SessionAuthentication is needed for the browsable API
     # Source: https://stackoverflow.com/a/38626166
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsOwnerOnly]
 
     queryset = Bookmark.objects.all()
