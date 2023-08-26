@@ -243,6 +243,9 @@ class BookmarkRetrieveTest(APITestCase):
     def test_successful_bookmark_retrieve_by_user(self):
         pass
 
+    def test_successful_bookmark_retrieve_by_user_in_another_section(self):
+        pass
+
     def test_successful_bookmark_returns_nothing_if_section_has_no_bookmark(self):
         pass
 
