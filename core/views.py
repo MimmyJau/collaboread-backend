@@ -300,9 +300,12 @@ class BookmarkRetrieveUpdateAPIView(
 
     def perform_create(self, serializer):
         extra_kwargs = {}
-        article = Article.objects.get(slug_full=self.kwargs.get("book"))
-        if not article:
-            raise NotFound(detail="Book not found.", code=404)
+        # This checks that Article exists before creating a bookmark for it.
+        # Can't just do Article.objects.get() because that throws an error.
+        # Note: This is different from check in get_object()
+        #       that checks whether a bookmark exists.
+        queryset = Article.objects.all().filter(slug_full=self.kwargs.get("book"))
+        article = get_object_or_404(queryset)
         # Important that we identify a bookmark by its root (not a specific chapter)
         book = article.get_root()
         extra_kwargs["book"] = book
