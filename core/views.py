@@ -283,7 +283,7 @@ class BookmarkRetrieveUpdateAPIView(
     # SessionAuthentication is needed for the browsable API
     # Source: https://stackoverflow.com/a/38626166
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsOwnerOnly]
+    permission_classes = [IsAuthenticated, IsOwnerOnly]
 
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
