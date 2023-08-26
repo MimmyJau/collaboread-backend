@@ -224,7 +224,15 @@ class BookmarkUpdateTest(APITestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_unsuccessful_bookmark_update_for_nonexistent_book(self):
-        pass
+        # Login as first user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create bookmark.
+        NON_EXISTENT_BOOK_URL = f"{BOOKMARK_DETAIL_URL}/this-book-does-not-exist/"
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        response = self.client.put(
+            NON_EXISTENT_BOOK_URL, valid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_unsuccessful_bookmark_update_missing_book_field(self):
         pass
