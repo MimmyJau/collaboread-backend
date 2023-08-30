@@ -270,12 +270,18 @@ class BookmarkSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """Ensure highlight contains at least one character"""
         if attrs["highlight_start"] != attrs["highlight_end"]:
-            raise serializers.ValidationError("Range for bookmark must be 0")
+            raise serializers.ValidationError(
+                {"end": "Range for bookmark must be 0"}, code=400
+            )
         return attrs
 
     def to_internal_value(self, data):
         """Convert structured data to flat data."""
         flat_data = data.copy()
+        if "highlight" not in flat_data:
+            raise serializers.ValidationError(
+                {"highlight": "This field is required."}, code=400
+            )
         bookmark_range = flat_data.pop("highlight")
         flat_data["highlight_start"] = bookmark_range[0]["character_range"]["start"]
         flat_data["highlight_end"] = bookmark_range[0]["character_range"]["end"]
