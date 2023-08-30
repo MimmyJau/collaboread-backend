@@ -284,13 +284,45 @@ class BookmarkUpdateTest(APITestCase):
         response = self.client.put(
             self.BOOKMARK_UPDATE_URL, invalid_bookmark_payload, format="json"
         )
-        print(response.data)
         self.assertEqual(response.status_code, 400)
 
 
 class BookmarkRetrieveTest(APITestCase):
+    def setUp(self):
+        # Create user.
+        response = self.client.post(REGISTRATION_URL, valid_user_payload)
+        self.token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create article.
+        self.book = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload
+        ).data
+        self.book_path = self.book["slug_full"]
+        # Create child article.
+        self.child = self.client.post(
+            f"{API_BASE_URL}/articles/{self.book_path}/add-child/",
+            valid_article_payload_2,
+        ).data
+        self.child_path = self.child["slug_full"]
+        # Set URL path.
+        self.BOOKMARK_UPDATE_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
+        self.PARENT_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
+        self.CHILD_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.child_path}/"
+        # Create bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        # Logout.
+        self.client.credentials()
+
     def test_successful_bookmark_retrieve_by_user(self):
-        pass
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Retrieve bookmark
+        response = self.client.get(self.PARENT_NODE_BOOKMARK_URL)
+        self.assertEqual(response.status_code, 200)
 
     def test_successful_bookmark_retrieve_by_user_in_another_section(self):
         pass
