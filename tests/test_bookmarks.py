@@ -333,8 +333,27 @@ class BookmarkRetrieveTest(APITestCase):
         response = self.client.get(self.CHILD_NODE_BOOKMARK_URL)
         self.assertEqual(response.status_code, 200)
 
-    def test_unsuccessful_bookmark_retrieve_by_another_user(self):
-        pass
+    def test_unsuccessful_bookmark_retrieve_by_another_user_in_section_with_bookmark(
+        self,
+    ):
+        # Create second user and store token.
+        response_user_2 = self.client.post(REGISTRATION_URL, valid_user_payload_2)
+        self.token_2 = response_user_2.data["key"]
+        # Login as second user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token_2)
+        response = self.client.get(self.PARENT_NODE_BOOKMARK_URL)
+        self.assertEqual(response.status_code, 204)
+
+    def test_unsuccessful_bookmark_retrieve_by_another_user_in_section_other_than_section_with_bookmark(
+        self,
+    ):
+        # Create second user and store token.
+        response_user_2 = self.client.post(REGISTRATION_URL, valid_user_payload_2)
+        self.token_2 = response_user_2.data["key"]
+        # Login as second user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token_2)
+        response = self.client.get(self.CHILD_NODE_BOOKMARK_URL)
+        self.assertEqual(response.status_code, 204)
 
     def test_unsuccessful_bookmark_retrieve_by_nonuser(self):
         response = self.client.get(self.CHILD_NODE_BOOKMARK_URL)
