@@ -2,7 +2,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
@@ -302,6 +302,16 @@ class BookmarkRetrieveUpdateAPIView(
         obj = get_object_or_404(queryset)  # Lookup the object
         self.check_object_permissions(self.request, obj)
         return obj
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Http404:
+            return Response({"bookmark": "None."}, status=status.HTTP_204_NO_CONTENT)
+        except Book.DoesNotExist:
+            return Response({"book": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def perform_create(self, serializer):
         extra_kwargs = {}
