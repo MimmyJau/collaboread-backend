@@ -337,7 +337,8 @@ class BookmarkRetrieveTest(APITestCase):
         pass
 
     def test_unsuccessful_bookmark_retrieve_by_nonuser(self):
-        pass
+        response = self.client.get(self.CHILD_NODE_BOOKMARK_URL)
+        self.assertEqual(response.status_code, 401)
 
 
 class BookmarkListTest(APITestCase):
