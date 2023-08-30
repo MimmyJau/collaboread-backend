@@ -1,3 +1,5 @@
+import copy
+
 from rest_framework.test import APITestCase
 
 BASE_URL = "http://localhost:8000"
@@ -235,16 +237,55 @@ class BookmarkUpdateTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_unsuccessful_bookmark_update_missing_book_field(self):
-        pass
+        # Login as first user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create bookmark.
+        NON_EXISTENT_BOOK_URL = f"{BOOKMARK_DETAIL_URL}/"
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        response = self.client.put(
+            NON_EXISTENT_BOOK_URL, valid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_unsuccessful_bookmark_update_missing_article_field(self):
-        pass
+        # Login as first user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create invalid bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        invalid_bookmark_payload = copy.deepcopy(valid_bookmark_payload)
+        invalid_bookmark_payload.pop("article")
+        # Post invalid bookmark.
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, invalid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_unsuccessful_bookmark_update_missing_highlight_field(self):
-        pass
+        # Login as first user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create invalid bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        invalid_bookmark_payload = copy.deepcopy(valid_bookmark_payload)
+        invalid_bookmark_payload.pop("highlight")
+        # Post invalid bookmark.
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, invalid_bookmark_payload, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_unsuccessful_bookmark_update_highlight_start_neq_highlight_end(self):
-        pass
+        # Login as first user.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create invalid bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        invalid_bookmark_payload = copy.deepcopy(valid_bookmark_payload)
+        invalid_bookmark_payload["highlight"][0]["characterRange"]["end"] = 6
+        # Post invalid bookmark.
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, invalid_bookmark_payload, format="json"
+        )
+        print(response.data)
+        self.assertEqual(response.status_code, 400)
 
 
 class BookmarkRetrieveTest(APITestCase):
