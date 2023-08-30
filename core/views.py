@@ -289,11 +289,16 @@ class BookmarkRetrieveUpdateAPIView(
     serializer_class = BookmarkSerializer
     lookup_field = "book"
 
+    def get_book(self):
+        article = get_object_or_404(Article, slug_full=self.kwargs.get("book"))
+        book = article.get_root()
+        return book
+
     def get_object(self):
         queryset = self.get_queryset()
         # Need the .id: https://stackoverflow.com/a/71108056
         queryset = queryset.filter(user=self.request.user.id)
-        queryset = queryset.filter(book__slug_full=self.kwargs.get("book"))
+        queryset = queryset.filter(book=self.get_book())
         obj = get_object_or_404(queryset)  # Lookup the object
         self.check_object_permissions(self.request, obj)
         return obj
