@@ -324,10 +324,14 @@ class BookmarkRetrieveTest(APITestCase):
         response = self.client.get(self.PARENT_NODE_BOOKMARK_URL)
         self.assertEqual(response.status_code, 200)
 
-    def test_successful_bookmark_retrieve_by_user_in_another_section(self):
-        pass
-
     def test_successful_bookmark_returns_nothing_if_section_has_no_bookmark(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Retrieve bookmark at child node.
+        response = self.client.get(self.CHILD_NODE_BOOKMARK_URL)
+        self.assertEqual(response.status_code, 204)
+
+    def test_successful_bookmark_retrieve_by_user_in_another_section(self):
         pass
 
     def test_unsuccessful_bookmark_retrieve_by_another_user(self):
