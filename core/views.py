@@ -9,6 +9,7 @@ from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import (
+    AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
@@ -34,6 +35,9 @@ def index(request):
 
 class ArticleListAPIView(generics.ListAPIView):
     """View all articles"""
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
 
     queryset = Article.get_root_nodes().filter(hidden=False)
     serializer_class = ArticleListSerializer

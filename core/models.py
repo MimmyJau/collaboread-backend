@@ -221,12 +221,12 @@ class Bookmark(models.Model):
 
     uuid = models.UUIDField(db_index=True, default=uuid.uuid4, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    article = models.ForeignKey(
-        Article, on_delete=models.CASCADE, related_name="bookmarks"
-    )
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="+")
     # Use "+" for related_name to avoid reverse accessor for this field
     # Source: https://docs.djangoproject.com/en/4.2/ref/models/fields/#django.db.models.ForeignKey.related_name
-    book = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="+")
+    book = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name="bookmarks"
+    )
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     highlight_start = models.PositiveIntegerField()

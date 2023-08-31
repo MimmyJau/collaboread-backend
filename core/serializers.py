@@ -50,6 +50,9 @@ class ArticleListSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=get_user_model().objects.all(), read_only=False, slug_field="username"
     )
+    bookmark_path = serializers.SerializerMethodField(
+        method_name="get_bookmark_path", read_only=True
+    )
 
     class Meta:
         model = Article
@@ -57,12 +60,21 @@ class ArticleListSerializer(serializers.ModelSerializer):
             "uuid",
             "slug_full",
             "user",
+            "bookmark_path",
             "title",
             "author",
             "created_on",
             "updated_on",
         ]
-        read_only = ["uuid", "slug_full", "created_on", "updated_on"]
+        read_only_fields = ["uuid", "slug_full", "created_on", "updated_on"]
+
+    def get_bookmark_path(self, obj):
+        if not self.context["request"].user.is_authenticated:
+            return None
+        bookmark = obj.bookmarks.filter(user=self.context["request"].user.id).first()
+        if not bookmark:
+            return None
+        return bookmark.article.slug_full
 
 
 class ArticleSerializer(serializers.ModelSerializer):
