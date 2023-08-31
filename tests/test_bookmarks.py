@@ -399,7 +399,7 @@ class BookmarkDeleteTest(APITestCase):
         pass
 
 
-class ArticleRetrieveWithBookmarkTest(APITestCase):
+class ArticleListWithBookmarkTest(APITestCase):
     def setUp(self):
         # Create user.
         response = self.client.post(REGISTRATION_URL, valid_user_payload)
@@ -424,79 +424,62 @@ class ArticleRetrieveWithBookmarkTest(APITestCase):
         ).data
         self.child_path_2 = self.child_2["slug_full"]
         # Set URL path.
-        self.BOOKMARK_UPDATE_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
         self.PARENT_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
         self.CHILD_1_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.child_path}/"
         self.CHILD_2_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.child_path_2}/"
-        self.BOOK_AT_BOOKMARK_RETRIEVE_URL = (
-            f"{BOOK_AT_BOOKMARK_RETRIEVE_URL}/{self.book_path}/"
-        )
+        self.BOOK_LIST_URL = f"{API_BASE_URL}/articles/"
         # Logout.
         self.client.credentials()
 
-    def test_successful_retrieve_book_section_with_bookmark_at_root_by_user(self):
+    def test_successful_return_root_bookmark_path_to_user(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
-        # Create bookmark.
+        # Create bookmark at root.
         valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
         response = self.client.put(
-            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+            self.PARENT_NODE_BOOKMARK_URL, valid_bookmark_payload, format="json"
         )
         # Retrieve book.
-        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        response = self.client.get(self.BOOK_LIST_URL)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["title"], valid_article_payload["title"])
-        self.assertEqual(response.data["slug_full"], self.book_path)
+        book_data = response.data[0]
+        self.assertEqual(book_data["bookmark_path"], self.book_path)
 
-    def test_successful_retrieve_book_section_with_bookmark_at_child_by_user(self):
+    def test_successful_return_child_bookmark_path_to_user(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Create bookmark at child.
         valid_bookmark_payload = generate_bookmark_payload(self.child_path, 9)
         response = self.client.put(
-            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+            self.CHILD_1_NODE_BOOKMARK_URL, valid_bookmark_payload, format="json"
         )
         # Retrieve book.
-        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        response = self.client.get(self.BOOK_LIST_URL)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["title"], valid_article_payload_2["title"])
-        self.assertEqual(response.data["slug_full"], self.child_path)
+        book_data = response.data[0]
+        self.assertEqual(book_data["bookmark_path"], self.child_path)
 
-    def test_successful_retrieve__first_section_of_book_without_bookmark_by_user(self):
+    def test_successful_return_null_bookmark_path_to_user_if_there_is_no_bookmark(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Retrieve book.
-        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        response = self.client.get(self.BOOK_LIST_URL)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["title"], valid_article_payload["title"])
-        self.assertEqual(response.data["slug_full"], self.book_path)
+        book_data = response.data[0]
+        self.assertEqual(book_data["bookmark_path"], None)
 
-    def test_successful_retrieve_first_section_of_book_with_bookmark_by_nonuser(self):
+    def test_successful_return_null_bookmark_path_to_nonuser(self):
         # Login.
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
         # Update bookmark.
         valid_bookmark_payload = generate_bookmark_payload(self.child_path, 9)
         response = self.client.put(
-            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+            self.PARENT_NODE_BOOKMARK_URL, valid_bookmark_payload, format="json"
         )
         # Logout
         self.client.credentials()
         # Retrieve book.
-        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        response = self.client.get(self.BOOK_LIST_URL)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["title"], valid_article_payload["title"])
-        self.assertEqual(response.data["slug_full"], self.book_path)
-
-
-class ArticleListWithBookmarkTest(APITestCase):
-    def test_successful_retrieve_list_of_books_with_bookmarks_by_user(self):
-        pass
-
-    def test_successful_retrieve_empty_list_of_books_with_bookmarks_by_user(self):
-        pass
-
-    def test_unsuccessful_retrieve_list_of_books_with_bookmarks_by_another_user(self):
-        pass
-
-    def test_unsuccessful_retrieve_list_of_books_with_bookmarks_by_nonuser(self):
-        pass
+        book_data = response.data[0]
+        self.assertEqual(book_data["bookmark_path"], None)
