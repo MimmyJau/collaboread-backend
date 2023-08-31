@@ -73,7 +73,14 @@ class CommentAdmin(TreeAdmin):
 
 
 class BookmarkAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "id",
+        "user",
+        "book",
+        "article",
+        "highlight_start",
+        "created_on",
+    )
 
 
 admin.site.register(Article, ArticleAdmin)
