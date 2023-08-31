@@ -16,6 +16,9 @@ ARTICLE_DETAIL_URL = f"{API_BASE_URL}/articles"
 BOOKMARK_CREATE_URL = f"{API_BASE_URL}/bookmarks/"
 BOOKMARK_DETAIL_URL = f"{API_BASE_URL}/bookmark"
 
+BOOK_AT_BOOKMARK_RETRIEVE_URL = f"{API_BASE_URL}/book-at-bookmark/"
+
+
 valid_user_payload = {
     "username": "testuser",
     "email": "test@email.com",
@@ -43,6 +46,14 @@ valid_article_payload_2 = {
     "articleHtml": "<p>This is a another article</p>",
     "articleJson": "{}",
     "articleText": "This is a another article",
+    "hidden": False,
+}
+
+valid_article_payload_3 = {
+    "title": "Third Article",
+    "articleHtml": "<p>This is a third article</p>",
+    "articleJson": "{}",
+    "articleText": "This is a third article",
     "hidden": False,
 }
 
@@ -389,14 +400,92 @@ class BookmarkDeleteTest(APITestCase):
 
 
 class ArticleRetrieveWithBookmarkTest(APITestCase):
-    def test_successful_retrieve_book_section_with_bookmark_by_user(self):
-        pass
+    def setUp(self):
+        # Create user.
+        response = self.client.post(REGISTRATION_URL, valid_user_payload)
+        self.token = response.data["key"]
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create article.
+        self.book = self.client.post(
+            ARTICLE_CREATE_ROOT_URL, valid_article_payload
+        ).data
+        self.book_path = self.book["slug_full"]
+        # Create first child article.
+        self.child = self.client.post(
+            f"{API_BASE_URL}/articles/{self.book_path}/add-child/",
+            valid_article_payload_2,
+        ).data
+        self.child_path = self.child["slug_full"]
+        # Create second child article.
+        self.child_2 = self.client.post(
+            f"{API_BASE_URL}/articles/{self.book_path}/add-child/",
+            valid_article_payload_3,
+        ).data
+        self.child_path_2 = self.child_2["slug_full"]
+        # Set URL path.
+        self.BOOKMARK_UPDATE_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
+        self.PARENT_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.book_path}/"
+        self.CHILD_1_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.child_path}/"
+        self.CHILD_2_NODE_BOOKMARK_URL = f"{BOOKMARK_DETAIL_URL}/{self.child_path_2}/"
+        self.BOOK_AT_BOOKMARK_RETRIEVE_URL = (
+            f"{BOOK_AT_BOOKMARK_RETRIEVE_URL}/{self.book_path}/"
+        )
+        # Logout.
+        self.client.credentials()
 
-    def test_successful_retrieve_book_first_section_without_bookmark_by_user(self):
-        pass
+    def test_successful_retrieve_book_section_with_bookmark_at_root_by_user(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.book_path, 5)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        # Retrieve book.
+        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], valid_article_payload["title"])
+        self.assertEqual(response.data["slug_full"], self.book_path)
 
-    def test_successful_retrieve_book_first_section_without_bookmark_by_nonuser(self):
-        pass
+    def test_successful_retrieve_book_section_with_bookmark_at_child_by_user(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Create bookmark at child.
+        valid_bookmark_payload = generate_bookmark_payload(self.child_path, 9)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        # Retrieve book.
+        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], valid_article_payload_2["title"])
+        self.assertEqual(response.data["slug_full"], self.child_path)
+
+    def test_successful_retrieve__first_section_of_book_without_bookmark_by_user(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Retrieve book.
+        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], valid_article_payload["title"])
+        self.assertEqual(response.data["slug_full"], self.book_path)
+
+    def test_successful_retrieve_first_section_of_book_with_bookmark_by_nonuser(self):
+        # Login.
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token)
+        # Update bookmark.
+        valid_bookmark_payload = generate_bookmark_payload(self.child_path, 9)
+        response = self.client.put(
+            self.BOOKMARK_UPDATE_URL, valid_bookmark_payload, format="json"
+        )
+        # Logout
+        self.client.credentials()
+        # Retrieve book.
+        response = self.client.get(self.BOOK_AT_BOOKMARK_RETRIEVE_URL)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], valid_article_payload["title"])
+        self.assertEqual(response.data["slug_full"], self.book_path)
 
 
 class ArticleListWithBookmarkTest(APITestCase):
